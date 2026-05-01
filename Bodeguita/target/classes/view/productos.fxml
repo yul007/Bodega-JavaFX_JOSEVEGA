@@ -1,50 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ProductoController">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.bodega.controller.ProductoController">
     <top>
         <VBox spacing="4.0" styleClass="header-bar">
             <padding>
                 <Insets bottom="18.0" left="28.0" right="28.0" top="18.0" />
             </padding>
-            <Label styleClass="screen-title" text="Productos" />
-            <Label styleClass="screen-subtitle" text="Catalogo, stock minimo y busqueda por nombre o codigo" />
+            <children>
+                <Label styleClass="screen-title" text="Productos" />
+                <Label styleClass="screen-subtitle" text="Catalogo, stock minimo y busqueda por nombre o codigo" />
+            </children>
         </VBox>
     </top>
+
     <center>
         <VBox spacing="14.0" styleClass="module-content">
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <TextField fx:id="buscadorField" onAction="#buscarProducto" prefWidth="320.0" promptText="Buscar por nombre, SKU o codigo" />
-                <Button onAction="#buscarProducto" styleClass="primary-button" text="Buscar" />
-                <Label fx:id="stockAlertaLabel" styleClass="stock-summary" text="Productos con stock bajo: 0" />
-            </HBox>
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <TextField fx:id="buscadorField" onAction="#buscarProducto" prefWidth="320.0"
+                                   promptText="Buscar por nombre, SKU o codigo" />
+                        <Button onAction="#buscarProducto" styleClass="primary-button" text="Buscar" />
+                        <Label fx:id="stockAlertaLabel" styleClass="stock-summary" text="Productos con stock bajo: 0" />
+                    </children>
+                </HBox>
 
-            <TableView fx:id="productosTable" prefHeight="420.0">
-                <columns>
-                    <TableColumn fx:id="idColumn" prefWidth="70.0" text="ID" />
-                    <TableColumn fx:id="nombreColumn" prefWidth="260.0" text="Nombre" />
-                    <TableColumn fx:id="categoriaColumn" prefWidth="180.0" text="Categoria" />
-                    <TableColumn fx:id="stockColumn" prefWidth="130.0" text="Stock" />
-                    <TableColumn fx:id="stockMinimoColumn" prefWidth="130.0" text="Stock minimo" />
-                </columns>
-            </TableView>
+                <TableView fx:id="productosTable" prefHeight="420.0">
+                    <columns>
+                        <TableColumn fx:id="idColumn" prefWidth="70.0" text="ID" />
+                        <TableColumn fx:id="nombreColumn" prefWidth="260.0" text="Nombre" />
+                        <TableColumn fx:id="categoriaColumn" prefWidth="180.0" text="Categoria" />
+                        <TableColumn fx:id="stockColumn" prefWidth="130.0" text="Stock" />
+                        <TableColumn fx:id="stockMinimoColumn" prefWidth="130.0" text="Stock minimo" />
+                    </columns>
+                </TableView>
 
-            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <Button onAction="#nuevoProducto" styleClass="primary-button" text="Nuevo" />
-                <Button onAction="#editarProducto" text="Editar" />
-                <Button onAction="#inactivarProducto" styleClass="danger-button" text="Eliminar/Inactivar" />
-                <Button onAction="#verLotes" text="Ver Lotes" />
-                <Button onAction="#nuevaSalida" text="Nueva Salida" />
-            </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Button onAction="#nuevoProducto" styleClass="primary-button" text="Nuevo" />
+                        <Button onAction="#editarProducto" text="Editar" />
+                        <Button onAction="#inactivarProducto" styleClass="danger-button" text="Eliminar/Inactivar" />
+                        <Button onAction="#verLotes" text="Ver Lotes" />
+                        <Button onAction="#nuevaSalida" text="Nueva Salida" />
+                        <Button onAction="#mostrarQrSeleccionado" text="Ver QR" />
+                    </children>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10" />
+                    </padding>
+                    <children>
+                        <VBox spacing="10" alignment="CENTER">
+                            <children>
+                                <Label text="Código QR del Producto" style="-fx-font-size: 14px;" />
+                                <ImageView fx:id="qrImageView" fitHeight="150.0" fitWidth="150.0" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
         </VBox>
     </center>
 </BorderPane>

@@ -3,45 +3,62 @@ package com.bodega.util;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-/** Controla la musica de fondo de la aplicacion sin bloquear la interfaz. */
-public final class MusicPlayer {
+import java.io.File;
 
-    private static final double DEFAULT_VOLUME = 0.25;
-    private static MediaPlayer mediaPlayer;
+public class MusicPlayer {
 
-    private MusicPlayer() {
-    }
+    private MediaPlayer mediaPlayer;
+    private double volume = 0.5; // Default volume (50%)
 
-    public static void play(String resourcePath) {
+    public MusicPlayer(String audioFilePath) {
         try {
-            if (mediaPlayer == null) {
-                var resource = MusicPlayer.class.getResource(resourcePath);
-                if (resource == null) {
-                    return;
-                }
-
-                Media media = new Media(resource.toExternalForm());
+            File audioFile = new File(audioFilePath);
+            if (audioFile.exists()) {
+                Media media = new Media(audioFile.toURI().toString());
                 mediaPlayer = new MediaPlayer(media);
-                mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-                mediaPlayer.setVolume(DEFAULT_VOLUME);
+                mediaPlayer.setVolume(volume);
+            } else {
+                System.err.println("El archivo de audio no existe: " + audioFilePath);
             }
-            mediaPlayer.play();
-        } catch (RuntimeException exception) {
-            stop();
+        } catch (Exception e) {
+            System.err.println("Error al cargar el archivo de música: " + e.getMessage());
         }
     }
 
-    public static void pause() {
+    public void play() {
         if (mediaPlayer != null) {
+            mediaPlayer.play();
+        } else {
+            System.err.println("MediaPlayer no está inicializado.");
+        }
+    }
+
+    public void pause() {
+        if (mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
             mediaPlayer.pause();
         }
     }
 
-    public static void stop() {
+    public void resume() {
+        if (mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.PAUSED) {
+            mediaPlayer.play();
+        }
+    }
+
+    public void stop() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
-            mediaPlayer.dispose();
-            mediaPlayer = null;
         }
+    }
+
+    public void setVolume(double volume) {
+        if (mediaPlayer != null) {
+            this.volume = Math.max(0, Math.min(volume, 1)); // Ensure volume is between 0 and 1
+            mediaPlayer.setVolume(this.volume);
+        }
+    }
+
+    public double getVolume() {
+        return volume;
     }
 }

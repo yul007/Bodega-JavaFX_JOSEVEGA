@@ -4,6 +4,7 @@ import com.bodega.dao.CategoriaDAO;
 import com.bodega.dao.ProductoDAO;
 import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
+import com.bodega.service.QrCodeService;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -27,7 +28,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 /** Controlador de productos: busqueda, CRUD y alertas visuales de stock. */
@@ -35,6 +38,7 @@ public class ProductoController {
 
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private final QrCodeService qrCodeService = new QrCodeService();
     private final ObservableList<Producto> productos = FXCollections.observableArrayList();
 
     @FXML
@@ -62,8 +66,12 @@ public class ProductoController {
     private TableColumn<Producto, BigDecimal> stockMinimoColumn;
 
     @FXML
+    private ImageView qrImageView;
+
+    @FXML
     private void initialize() {
         configurarTabla();
+        configurarSeleccionQr();
         cargarProductos();
     }
 
@@ -151,6 +159,16 @@ public class ProductoController {
         }
     }
 
+    @FXML
+    private void mostrarQrSeleccionado() {
+        Producto seleccionado = obtenerSeleccionado();
+        if (seleccionado == null) {
+            qrImageView.setImage(null);
+            return;
+        }
+        qrCodeService.generarQRCode(seleccionado, qrImageView);
+    }
+
     private void configurarTabla() {
         idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto()));
         nombreColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
@@ -178,6 +196,16 @@ public class ProductoController {
                     getStyleClass().add("stock-warning-row");
                 }
             }
+        });
+    }
+
+    private void configurarSeleccionQr() {
+        productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> {
+            if (actual == null) {
+                qrImageView.setImage(null);
+                return;
+            }
+            qrCodeService.generarQRCode(actual, qrImageView);
         });
     }
 

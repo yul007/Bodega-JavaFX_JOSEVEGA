@@ -1,7 +1,14 @@
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/App.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/CategoriaController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/ClienteController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/DashboardController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/LoginController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/LoteController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/MenuController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/ProductoController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/ProveedorController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/ReporteController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/SalidaController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/package-info.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/CategoriaDAO.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/ClienteDAO.java
@@ -29,6 +36,8 @@
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/KardexService.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/LoteCompraService.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/NotaSalidaService.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/QrCodeService.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/ReporteService.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/package-info.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/util/MusicPlayer.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/util/package-info.java

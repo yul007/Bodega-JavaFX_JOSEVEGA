@@ -1,23 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ClienteController">
     <top>
         <VBox spacing="4.0" styleClass="header-bar">
             <padding>
                 <Insets bottom="18.0" left="28.0" right="28.0" top="18.0" />
             </padding>
-            <Label styleClass="screen-title" text="Clientes" />
-            <Label styleClass="screen-subtitle" text="Datos de clientes para notas de salida" />
+            <children>
+                <Label styleClass="screen-title" text="Clientes" />
+                <Label styleClass="screen-subtitle" text="Datos de clientes para notas de salida" />
+            </children>
         </VBox>
     </top>
     <center>
-        <VBox spacing="12.0" styleClass="module-content">
-            <Label styleClass="screen-subtitle" text="Modulo listo para conectar CRUD de clientes." />
+        <VBox spacing="14.0" styleClass="module-content">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <TextField fx:id="buscadorField" onAction="#buscarCliente" prefWidth="320.0" promptText="Buscar por nombre o identificacion" />
+                        <Button onAction="#buscarCliente" styleClass="primary-button" text="Buscar" />
+                        <Button onAction="#listarClientes" styleClass="secondary-button" text="Listar" />
+                        <Label fx:id="resumenLabel" styleClass="screen-subtitle" text="Clientes activos: 0" />
+                    </children>
+                </HBox>
+
+                <TableView fx:id="clientesTable" prefHeight="420.0">
+                    <columns>
+                        <TableColumn fx:id="idColumn" prefWidth="70.0" text="ID" />
+                        <TableColumn fx:id="identificacionColumn" prefWidth="150.0" text="Identificacion" />
+                        <TableColumn fx:id="nombreColumn" prefWidth="210.0" text="Nombre" />
+                        <TableColumn fx:id="telefonoColumn" prefWidth="130.0" text="Telefono" />
+                        <TableColumn fx:id="emailColumn" prefWidth="190.0" text="Email" />
+                        <TableColumn fx:id="direccionColumn" prefWidth="220.0" text="Direccion" />
+                    </columns>
+                </TableView>
+
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Button onAction="#nuevoCliente" styleClass="primary-button" text="Nuevo" />
+                        <Button onAction="#editarCliente" text="Editar" />
+                        <Button onAction="#inactivarCliente" styleClass="danger-button" text="Eliminar/Inactivar" />
+                    </children>
+                </HBox>
+            </children>
         </VBox>
     </center>
 </BorderPane>

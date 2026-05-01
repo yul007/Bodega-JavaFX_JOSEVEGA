@@ -1,0 +1,89 @@
+.app-root {
+    -fx-background-color: #f4f7fb;
+    -fx-font-family: "Arial";
+}
+
+.login-panel {
+    -fx-background-color: white;
+    -fx-border-color: #d9e2ef;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(30, 41, 59, 0.14), 18, 0, 0, 8);
+}
+
+.header-bar {
+    -fx-background-color: #16324f;
+}
+
+.screen-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #16324f;
+}
+
+.header-bar .screen-title,
+.header-bar .screen-subtitle {
+    -fx-text-fill: white;
+}
+
+.screen-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #52657a;
+}
+
+.primary-button {
+    -fx-background-color: #1f7a4d;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.secondary-button {
+    -fx-background-color: #dbe4ef;
+    -fx-text-fill: #16324f;
+}
+
+.danger-button {
+    -fx-background-color: #b42318;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.menu-tile {
+    -fx-alignment: center;
+    -fx-pref-width: 180px;
+    -fx-pref-height: 86px;
+    -fx-background-color: white;
+    -fx-border-color: #d9e2ef;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #16324f;
+}
+
+.menu-tile:hover {
+    -fx-background-color: #edf5ff;
+    -fx-border-color: #6aa5d8;
+    -fx-cursor: hand;
+}
+
+.module-shell {
+    -fx-background-color: #f4f7fb;
+}
+
+.module-content {
+    -fx-padding: 32;
+}
+
+.stock-summary {
+    -fx-text-fill: #8a4b00;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell.stock-low-row {
+    -fx-background-color: #ffe6e2;
+}
+
+.table-row-cell.stock-warning-row {
+    -fx-background-color: #fff4cf;
+}

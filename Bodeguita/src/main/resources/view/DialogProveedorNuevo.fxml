@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10" padding="10">
+    <children>
+        <Label text="RUC:" />
+        <TextField fx:id="txtRuc" />
+
+        <Label text="Nombre:" />
+        <TextField fx:id="txtNombre" />
+
+        <Label text="Contacto:" />
+        <TextField fx:id="txtContacto" />
+
+        <Label text="Teléfono:" />
+        <TextField fx:id="txtTelefono" />
+
+        <Label text="Email:" />
+        <TextField fx:id="txtEmail" />
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Guardar" onAction="#onGuardar" />
+            <Button text="Cancelar" onAction="#onCancelar" />
+        </HBox>
+    </children>
+</VBox>

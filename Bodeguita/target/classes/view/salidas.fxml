@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <VBox spacing="4.0" styleClass="header-bar">
+            <padding>
+                <Insets bottom="18.0" left="28.0" right="28.0" top="18.0" />
+            </padding>
+            <Label styleClass="screen-title" text="Salidas" />
+            <Label styleClass="screen-subtitle" text="Notas de salida, IVA 12%, FIFO y utilidad" />
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="12.0" styleClass="module-content">
+            <Label styleClass="screen-subtitle" text="Modulo listo para conectar ventas y descuentos FIFO." />
+        </VBox>
+    </center>
+</BorderPane>

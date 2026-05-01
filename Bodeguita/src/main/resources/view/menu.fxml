@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.MenuController">
+    <top>
+        <VBox spacing="4.0" styleClass="header-bar">
+            <padding>
+                <Insets bottom="18.0" left="28.0" right="28.0" top="18.0" />
+            </padding>
+            <Label styleClass="screen-title" text="Bodega Master" />
+            <Label fx:id="usuarioActivoLabel" styleClass="screen-subtitle" text="Usuario activo: admin" />
+        </VBox>
+    </top>
+    <center>
+        <GridPane alignment="CENTER" hgap="16.0" vgap="16.0">
+            <Button onAction="#abrirProductos" styleClass="menu-tile" text="Productos" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Button onAction="#abrirLotes" styleClass="menu-tile" text="Lotes" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Button onAction="#abrirSalidas" styleClass="menu-tile" text="Salidas" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Button onAction="#abrirKardex" styleClass="menu-tile" text="Kardex" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+            <Button onAction="#abrirClientes" styleClass="menu-tile" text="Clientes" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button onAction="#abrirReportes" styleClass="menu-tile" text="Reportes" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button onAction="#abrirDashboard" styleClass="menu-tile" text="Dashboard" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        </GridPane>
+    </center>
+</BorderPane>

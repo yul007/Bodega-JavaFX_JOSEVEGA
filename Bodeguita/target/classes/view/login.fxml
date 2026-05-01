@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="600.0" prefWidth="900.0" styleClass="app-root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.LoginController">
+    <center>
+        <VBox alignment="CENTER" maxWidth="420.0" spacing="18.0" styleClass="login-panel">
+            <padding>
+                <Insets bottom="36.0" left="40.0" right="40.0" top="36.0" />
+            </padding>
+
+            <Label styleClass="screen-title" text="Sistema de Gestion de Bodega" />
+            <Label styleClass="screen-subtitle" text="Ingreso de administrador" />
+
+            <GridPane hgap="12.0" vgap="12.0">
+                <Label text="Usuario" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="usuarioField" promptText="admin" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Contrasena" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <PasswordField fx:id="contrasenaField" onAction="#ingresar" promptText="admin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </GridPane>
+
+            <HBox alignment="CENTER" spacing="10.0">
+                <Button defaultButton="true" onAction="#ingresar" styleClass="primary-button" text="Ingresar" />
+                <Button cancelButton="true" onAction="#salir" styleClass="secondary-button" text="Salir" />
+                <ToggleButton fx:id="musicaToggle" onAction="#alternarMusica" text="Musica OFF" />
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

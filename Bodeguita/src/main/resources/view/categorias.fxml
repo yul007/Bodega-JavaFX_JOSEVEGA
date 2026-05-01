@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.CategoriaController">
+    <top>
+        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #E0E0E0; -fx-padding: 10px;">
+            <Label text="Gestión de Categorías" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+        </HBox>
+    </top>
+    
+    <center>
+        <VBox spacing="10" alignment="CENTER" padding="10">
+            <TableView fx:id="categoriaTable" style="-fx-pref-width: 600;">
+                <columns>
+                    <TableColumn text="ID" fx:id="colId" />
+                    <TableColumn text="Nombre" fx:id="colNombre" />
+                    <TableColumn text="Descripción" fx:id="colDescripcion" />
+                </columns>
+            </TableView>
+            
+            <HBox spacing="10" alignment="CENTER" padding="10">
+                <Button fx:id="btnNuevaCategoria" text="Nueva" onAction="#onNuevaCategoria" />
+                <Button fx:id="btnEditarCategoria" text="Editar" onAction="#onEditarCategoria" />
+                <Button fx:id="btnInactivarCategoria" text="Inactivar" onAction="#onInactivarCategoria" />
+                <Button fx:id="btnRefrescar" text="Refrescar" onAction="#onRefrescar" />
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

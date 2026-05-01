@@ -1,6 +1,6 @@
 package com.bodega.controller;
 
-import com.bodegamaster.model.Categoria;
+import com.bodega.model.Categoria;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

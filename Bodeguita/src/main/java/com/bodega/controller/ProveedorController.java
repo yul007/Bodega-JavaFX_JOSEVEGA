@@ -1,6 +1,6 @@
 package com.bodega.controller;
 
-import com.bodegamaster.model.Proveedor;
+import com.bodega.model.Proveedor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

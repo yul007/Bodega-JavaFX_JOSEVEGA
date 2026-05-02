@@ -64,8 +64,8 @@ public class LoteController {
         productos = FXCollections.observableArrayList(); // Load from ProductoDAO
         proveedores = FXCollections.observableArrayList(); // Load from ProveedorDAO
 
-        colProducto.setCellValueFactory(new PropertyValueFactory<>("productoNombre"));
-        colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedorNombre"));
+        colProducto.setCellValueFactory(new PropertyValueFactory<>("producto"));
+        colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colCostoUnitario.setCellValueFactory(new PropertyValueFactory<>("costoUnitario"));
         colFechaIngreso.setCellValueFactory(new PropertyValueFactory<>("fechaIngreso"));
@@ -80,17 +80,34 @@ public class LoteController {
         try {
             Producto producto = comboProducto.getValue();
             Proveedor proveedor = comboProveedor.getValue();
-            int cantidad = Integer.parseInt(txtCantidad.getText());
+            BigDecimal cantidad = new BigDecimal(txtCantidad.getText());
             BigDecimal costoUnitario = new BigDecimal(txtCostoUnitario.getText());
             LocalDate fechaIngreso = dateFechaIngreso.getValue();
             LocalDate fechaVencimiento = dateFechaVencimiento.getValue();
             String facturaReferencia = txtFacturaReferencia.getText();
 
-            if (producto == null || proveedor == null || cantidad <= 0 || costoUnitario.compareTo(BigDecimal.ZERO) <= 0 || fechaIngreso == null) {
+            if (producto == null || proveedor == null || cantidad.compareTo(BigDecimal.ZERO) <= 0 || 
+                costoUnitario.compareTo(BigDecimal.ZERO) <= 0 || fechaIngreso == null) {
                 throw new IllegalArgumentException("Todos los campos obligatorios deben completarse correctamente.");
             }
 
-            Lote nuevoLote = new Lote(producto, proveedor, cantidad, costoUnitario, fechaIngreso, fechaVencimiento, facturaReferencia);
+            String codigoLote = "LOT-" + System.currentTimeMillis(); // Código temporal
+            BigDecimal cantidadDisponible = cantidad;
+
+            Lote nuevoLote = new Lote(
+                0, // idLote (0 para nuevo, la BD generará el ID)
+                producto,
+                proveedor,
+                codigoLote,
+                cantidad,
+                cantidadDisponible,
+                costoUnitario,
+                fechaIngreso,
+                fechaVencimiento,
+                facturaReferencia,
+                true
+            );
+
             // Simulate saving to DB
             lotes.add(nuevoLote);
 
@@ -107,7 +124,7 @@ public class LoteController {
         }
     }
 
-    private void actualizarStockKardex(Producto producto, int cantidad, BigDecimal costoUnitario) {
+    private void actualizarStockKardex(Producto producto, BigDecimal cantidad, BigDecimal costoUnitario) {
         // Logic to update stock and register in Kardex
         // Example: productoDAO.updateStock(producto, cantidad);
         // kardexService.registrarEntrada(producto, cantidad, costoUnitario);

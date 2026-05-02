@@ -1,10 +1,17 @@
 package com.bodega.controller;
 
+import com.bodega.dao.CategoriaDAO;
 import com.bodega.model.Categoria;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+
+import java.sql.SQLException;
+import java.util.Optional;
 
 public class CategoriaController {
 
@@ -21,26 +28,81 @@ public class CategoriaController {
     private TableColumn<Categoria, String> colDescripcion;
 
     private ObservableList<Categoria> categorias;
+    private CategoriaDAO categoriaDAO;
 
     @FXML
     public void initialize() {
-        categorias = FXCollections.observableArrayList(); // Fetch from database via DAO
+        categoriaDAO = new CategoriaDAO();
+        categorias = FXCollections.observableArrayList();
 
-        colId.setCellValueFactory(cellData -> cellData.getValue().idProperty().asString());
-        colNombre.setCellValueFactory(cellData -> cellData.getValue().nombreProperty());
-        colDescripcion.setCellValueFactory(cellData -> cellData.getValue().descripcionProperty());
+        colId.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
 
         categoriaTable.setItems(categorias);
         loadCategorias();
     }
 
     public void loadCategorias() {
-        // Fetch records e.g. categorias.setAll(categoriaDAO.findAll());
+        try {
+            categorias.setAll(categoriaDAO.listarActivas());
+        } catch (SQLException e) {
+            showAlert("Error al cargar categorías: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
     public void onNuevaCategoria() {
-        // Show modal to create a new Categoria
+        Dialog<Categoria> dialog = new Dialog<>();
+        dialog.setTitle("Nueva Categoría");
+        dialog.setHeaderText("Crear nueva categoría");
+
+        ButtonType saveButtonType = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        TextField nombreField = new TextField();
+        nombreField.setPromptText("Nombre");
+        TextArea descripcionArea = new TextArea();
+        descripcionArea.setPromptText("Descripción");
+        descripcionArea.setPrefRowCount(3);
+
+        grid.add(new Label("Nombre:"), 0, 0);
+        grid.add(nombreField, 1, 0);
+        grid.add(new Label("Descripción:"), 0, 1);
+        grid.add(descripcionArea, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty();
+        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                Categoria categoria = new Categoria();
+                categoria.setNombre(nombreField.getText());
+                categoria.setDescripcion(descripcionArea.getText());
+                categoria.setActivo(true);
+                return categoria;
+            }
+            return null;
+        });
+
+        Optional<Categoria> result = dialog.showAndWait();
+        result.ifPresent(categoria -> {
+            try {
+                int id = categoriaDAO.crear(categoria);
+                categoria.setIdCategoria(id);
+                categorias.add(categoria);
+                showAlert("Categoría creada exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                showAlert("Error al crear categoría: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
+        });
     }
 
     @FXML
@@ -51,7 +113,54 @@ public class CategoriaController {
             return;
         }
 
-        // Opens edit modal for the selected Categoria
+        Dialog<Categoria> dialog = new Dialog<>();
+        dialog.setTitle("Editar Categoría");
+        dialog.setHeaderText("Editar categoría: " + selected.getNombre());
+
+        ButtonType saveButtonType = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        TextField nombreField = new TextField(selected.getNombre());
+        nombreField.setPromptText("Nombre");
+        TextArea descripcionArea = new TextArea(selected.getDescripcion());
+        descripcionArea.setPromptText("Descripción");
+        descripcionArea.setPrefRowCount(3);
+
+        grid.add(new Label("Nombre:"), 0, 0);
+        grid.add(nombreField, 1, 0);
+        grid.add(new Label("Descripción:"), 0, 1);
+        grid.add(descripcionArea, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty();
+        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                selected.setNombre(nombreField.getText());
+                selected.setDescripcion(descripcionArea.getText());
+                return selected;
+            }
+            return null;
+        });
+
+        Optional<Categoria> result = dialog.showAndWait();
+        result.ifPresent(categoria -> {
+            try {
+                if (categoriaDAO.actualizar(categoria)) {
+                    categoriaTable.refresh();
+                    showAlert("Categoría actualizada exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+                }
+            } catch (SQLException e) {
+                showAlert("Error al actualizar categoría: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
+        });
     }
 
     @FXML
@@ -61,11 +170,22 @@ public class CategoriaController {
             showAlert("Seleccione una categoría para inactivar.", "Información", Alert.AlertType.INFORMATION);
             return;
         }
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "¿Está seguro de inactivar esta categoría?", ButtonType.YES, ButtonType.NO);
+        
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, 
+            "¿Está seguro de inactivar esta categoría?", 
+            ButtonType.YES, 
+            ButtonType.NO);
         confirmation.showAndWait();
+        
         if (confirmation.getResult() == ButtonType.YES) {
-            // Call DAO to mark Categoria as inactive
-            categorias.remove(selected);
+            try {
+                if (categoriaDAO.inactivar(selected.getIdCategoria())) {
+                    categorias.remove(selected);
+                    showAlert("Categoría inactivada exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+                }
+            } catch (SQLException e) {
+                showAlert("Error al inactivar categoría: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
         }
     }
 

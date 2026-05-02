@@ -1,7 +1,7 @@
 package com.bodega.controller;
 
+import com.bodega.App;
 import com.bodega.util.MusicPlayer;
-import java.io.IOException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,13 +12,16 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 /** Controlador de login para autenticar al usuario de demostracion. */
 public class LoginController {
 
     private static final String DEMO_USER = "admin";
     private static final String DEMO_PASSWORD = "admin";
-    private static final String LOGIN_MUSIC = "/audio/login.mp3";
+
+    //private MusicPlayer musicPlayer = new MusicPlayer("/music/musicaFondo.mp3");
+    private MusicPlayer musicPlayer = new MusicPlayer(getClass().getResource("/music/musicaFondo.mp3").toExternalForm());
 
     @FXML
     private TextField usuarioField;
@@ -35,6 +38,7 @@ public class LoginController {
         String contrasena = contrasenaField.getText() == null ? "" : contrasenaField.getText();
 
         if (DEMO_USER.equals(usuario) && DEMO_PASSWORD.equals(contrasena)) {
+            musicPlayer.stop();
             abrirMenu();
             return;
         }
@@ -46,17 +50,17 @@ public class LoginController {
 
     @FXML
     private void salir() {
-        MusicPlayer.stop();
+        musicPlayer.stop();
         Platform.exit();
     }
 
     @FXML
     private void alternarMusica() {
         if (musicaToggle.isSelected()) {
-            MusicPlayer.play(LOGIN_MUSIC);
+            musicPlayer.play();
             musicaToggle.setText("Musica ON");
         } else {
-            MusicPlayer.pause();
+            musicPlayer.pause();
             musicaToggle.setText("Musica OFF");
         }
     }

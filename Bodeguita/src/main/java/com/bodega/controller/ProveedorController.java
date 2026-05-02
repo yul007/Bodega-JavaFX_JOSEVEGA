@@ -1,10 +1,16 @@
 package com.bodega.controller;
 
+import com.bodega.dao.ProveedorDAO;
 import com.bodega.model.Proveedor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+
+import java.sql.SQLException;
+import java.util.Optional;
 
 public class ProveedorController {
 
@@ -27,28 +33,103 @@ public class ProveedorController {
     private TableColumn<Proveedor, String> colEmail;
 
     private ObservableList<Proveedor> proveedores;
+    private ProveedorDAO proveedorDAO;
 
     @FXML
     public void initialize() {
-        proveedores = FXCollections.observableArrayList(); // Replace with DAO or database call
+        proveedorDAO = new ProveedorDAO();
+        proveedores = FXCollections.observableArrayList();
 
-        colRuc.setCellValueFactory(cellData -> cellData.getValue().rucProperty());
-        colNombre.setCellValueFactory(cellData -> cellData.getValue().nombreProperty());
-        colContacto.setCellValueFactory(cellData -> cellData.getValue().contactoProperty());
-        colTelefono.setCellValueFactory(cellData -> cellData.getValue().telefonoProperty());
-        colEmail.setCellValueFactory(cellData -> cellData.getValue().emailProperty());
+        colRuc.setCellValueFactory(new PropertyValueFactory<>("ruc"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colContacto.setCellValueFactory(new PropertyValueFactory<>("contacto"));
+        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
 
         proveedorTable.setItems(proveedores);
         loadProveedores();
     }
 
     public void loadProveedores() {
-        // Load Proveedores e.g. proveedores.setAll(proveedorDAO.findAll());
+        try {
+            proveedores.setAll(proveedorDAO.listarActivos());
+        } catch (SQLException e) {
+            showAlert("Error al cargar proveedores: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
     public void onNuevoProveedor() {
-        // Opens modal to create new Proveedor
+        Dialog<Proveedor> dialog = new Dialog<>();
+        dialog.setTitle("Nuevo Proveedor");
+        dialog.setHeaderText("Crear nuevo proveedor");
+
+        ButtonType saveButtonType = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        TextField rucField = new TextField();
+        rucField.setPromptText("RUC");
+        TextField nombreField = new TextField();
+        nombreField.setPromptText("Nombre");
+        TextField contactoField = new TextField();
+        contactoField.setPromptText("Contacto");
+        TextField telefonoField = new TextField();
+        telefonoField.setPromptText("Teléfono");
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email");
+        TextField direccionField = new TextField();
+        direccionField.setPromptText("Dirección");
+
+        grid.add(new Label("RUC:"), 0, 0);
+        grid.add(rucField, 1, 0);
+        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(nombreField, 1, 1);
+        grid.add(new Label("Contacto:"), 0, 2);
+        grid.add(contactoField, 1, 2);
+        grid.add(new Label("Teléfono:"), 0, 3);
+        grid.add(telefonoField, 1, 3);
+        grid.add(new Label("Email:"), 0, 4);
+        grid.add(emailField, 1, 4);
+        grid.add(new Label("Dirección:"), 0, 5);
+        grid.add(direccionField, 1, 5);
+
+        dialog.getDialogPane().setContent(grid);
+
+        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty()
+                .or(rucField.textProperty().isEmpty());
+        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                Proveedor proveedor = new Proveedor();
+                proveedor.setRuc(rucField.getText());
+                proveedor.setNombre(nombreField.getText());
+                proveedor.setContacto(contactoField.getText());
+                proveedor.setTelefono(telefonoField.getText());
+                proveedor.setEmail(emailField.getText());
+                proveedor.setDireccion(direccionField.getText());
+                proveedor.setActivo(true);
+                return proveedor;
+            }
+            return null;
+        });
+
+        Optional<Proveedor> result = dialog.showAndWait();
+        result.ifPresent(proveedor -> {
+            try {
+                int id = proveedorDAO.crear(proveedor);
+                proveedor.setIdProveedor(id);
+                proveedores.add(proveedor);
+                showAlert("Proveedor creado exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                showAlert("Error al crear proveedor: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
+        });
     }
 
     @FXML
@@ -59,7 +140,74 @@ public class ProveedorController {
             return;
         }
 
-        // Open modal to edit selected Proveedor
+        Dialog<Proveedor> dialog = new Dialog<>();
+        dialog.setTitle("Editar Proveedor");
+        dialog.setHeaderText("Editar proveedor: " + selected.getNombre());
+
+        ButtonType saveButtonType = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+        TextField rucField = new TextField(selected.getRuc());
+        rucField.setPromptText("RUC");
+        TextField nombreField = new TextField(selected.getNombre());
+        nombreField.setPromptText("Nombre");
+        TextField contactoField = new TextField(selected.getContacto());
+        contactoField.setPromptText("Contacto");
+        TextField telefonoField = new TextField(selected.getTelefono());
+        telefonoField.setPromptText("Teléfono");
+        TextField emailField = new TextField(selected.getEmail());
+        emailField.setPromptText("Email");
+        TextField direccionField = new TextField(selected.getDireccion());
+        direccionField.setPromptText("Dirección");
+
+        grid.add(new Label("RUC:"), 0, 0);
+        grid.add(rucField, 1, 0);
+        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(nombreField, 1, 1);
+        grid.add(new Label("Contacto:"), 0, 2);
+        grid.add(contactoField, 1, 2);
+        grid.add(new Label("Teléfono:"), 0, 3);
+        grid.add(telefonoField, 1, 3);
+        grid.add(new Label("Email:"), 0, 4);
+        grid.add(emailField, 1, 4);
+        grid.add(new Label("Dirección:"), 0, 5);
+        grid.add(direccionField, 1, 5);
+
+        dialog.getDialogPane().setContent(grid);
+
+        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty()
+                .or(rucField.textProperty().isEmpty());
+        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                selected.setRuc(rucField.getText());
+                selected.setNombre(nombreField.getText());
+                selected.setContacto(contactoField.getText());
+                selected.setTelefono(telefonoField.getText());
+                selected.setEmail(emailField.getText());
+                selected.setDireccion(direccionField.getText());
+                return selected;
+            }
+            return null;
+        });
+
+        Optional<Proveedor> result = dialog.showAndWait();
+        result.ifPresent(proveedor -> {
+            try {
+                if (proveedorDAO.actualizar(proveedor)) {
+                    proveedorTable.refresh();
+                    showAlert("Proveedor actualizado exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+                }
+            } catch (SQLException e) {
+                showAlert("Error al actualizar proveedor: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
+        });
     }
 
     @FXML
@@ -69,11 +217,22 @@ public class ProveedorController {
             showAlert("Seleccione un proveedor para inactivar.", "Información", Alert.AlertType.INFORMATION);
             return;
         }
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, "¿Está seguro de inactivar este proveedor?", ButtonType.YES, ButtonType.NO);
+        
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION, 
+            "¿Está seguro de inactivar este proveedor?", 
+            ButtonType.YES, 
+            ButtonType.NO);
         confirmation.showAndWait();
+        
         if (confirmation.getResult() == ButtonType.YES) {
-            // Use DAO to inactivate the Proveedor
-            proveedores.remove(selected);
+            try {
+                if (proveedorDAO.inactivar(selected.getIdProveedor())) {
+                    proveedores.remove(selected);
+                    showAlert("Proveedor inactivado exitosamente", "Éxito", Alert.AlertType.INFORMATION);
+                }
+            } catch (SQLException e) {
+                showAlert("Error al inactivar proveedor: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            }
         }
     }
 

@@ -1,5 +1,0 @@
-Fecha,Tipo,Producto,Cantidad,Costo Unitario,Saldo Cantidad,Saldo Valor,Referencia
-2026-05-01,ENTRADA,Agua de Coco,6.00,0.50,26.00,3.00,FAC-COMP-006
-2026-05-01,ENTRADA,Agua de Coco,10.00,1.00,36.00,13.00,FAC-COMP-007
-2026-05-01,SALIDA,Agua de Coco,9.00,1.00,21.00,1.00,VENTA-002
-2026-05-01,SALIDA,Agua de Coco,6.00,0.50,30.00,10.00,VENTA-002

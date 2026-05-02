@@ -3,33 +3,62 @@ package com.bodega.util;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
+import java.net.URL;
 
+/** Reproductor simple para musica de fondo y efectos cortos desde resources. */
 public class MusicPlayer {
 
-    private MediaPlayer mediaPlayer;
-    private double volume = 0.5; // Default volume (50%)
+    private static final String DEFAULT_BACKGROUND_MUSIC = "/music/musicaFondo.mp3";
+    private static MusicPlayer backgroundMusicPlayer;
 
-    public MusicPlayer(String audioFilePath) {
-        try {
-            File audioFile = new File(audioFilePath);
-            if (audioFile.exists()) {
-                Media media = new Media(audioFile.toURI().toString());
-                mediaPlayer = new MediaPlayer(media);
-                mediaPlayer.setVolume(volume);
-            } else {
-                System.err.println("El archivo de audio no existe: " + audioFilePath);
-            }
-        } catch (Exception e) {
-            System.err.println("Error al cargar el archivo de música: " + e.getMessage());
+    private final MediaPlayer mediaPlayer;
+    private double volume = 0.8;
+
+    public MusicPlayer(String resourcePath) {
+        this(resourcePath, true);
+    }
+
+    public MusicPlayer(String resourcePath, boolean loop) {
+        this.mediaPlayer = crearMediaPlayer(resourcePath);
+        if (mediaPlayer != null) {
+            mediaPlayer.setVolume(volume);
+            mediaPlayer.setCycleCount(loop ? MediaPlayer.INDEFINITE : 1);
+        }
+    }
+
+    public static MusicPlayer cargarDesdeResources(String resourcePath) {
+        return new MusicPlayer(resourcePath);
+    }
+
+    public static synchronized MusicPlayer musicaFondoCompartida() {
+        if (backgroundMusicPlayer == null) {
+            backgroundMusicPlayer = new MusicPlayer(DEFAULT_BACKGROUND_MUSIC, true);
+        }
+        return backgroundMusicPlayer;
+    }
+
+    public static synchronized void reproducirMusicaFondo() {
+        musicaFondoCompartida().play();
+    }
+
+    public static synchronized void pausarMusicaFondo() {
+        musicaFondoCompartida().pause();
+    }
+
+    public static synchronized void reanudarMusicaFondo() {
+        musicaFondoCompartida().resume();
+    }
+
+    public static synchronized void detenerMusicaFondo() {
+        if (backgroundMusicPlayer != null) {
+            backgroundMusicPlayer.stop();
         }
     }
 
     public void play() {
         if (mediaPlayer != null) {
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
             mediaPlayer.play();
-        } else {
-            System.err.println("MediaPlayer no está inicializado.");
         }
     }
 
@@ -52,13 +81,37 @@ public class MusicPlayer {
     }
 
     public void setVolume(double volume) {
+        this.volume = Math.max(0, Math.min(volume, 1));
         if (mediaPlayer != null) {
-            this.volume = Math.max(0, Math.min(volume, 1)); // Ensure volume is between 0 and 1
             mediaPlayer.setVolume(this.volume);
         }
     }
 
     public double getVolume() {
         return volume;
+    }
+
+    private MediaPlayer crearMediaPlayer(String resourcePath) {
+        try {
+            String normalized = normalizarRuta(resourcePath);
+            URL resource = MusicPlayer.class.getResource(normalized);
+            if (resource == null) {
+                System.err.println("No se encontro el recurso de audio: " + normalized);
+                return null;
+            }
+
+            Media media = new Media(resource.toExternalForm());
+            return new MediaPlayer(media);
+        } catch (Exception exception) {
+            System.err.println("Error al cargar el audio " + resourcePath + ": " + exception.getMessage());
+            return null;
+        }
+    }
+
+    private String normalizarRuta(String resourcePath) {
+        if (resourcePath == null || resourcePath.isBlank()) {
+            throw new IllegalArgumentException("La ruta del audio es obligatoria.");
+        }
+        return resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
     }
 }

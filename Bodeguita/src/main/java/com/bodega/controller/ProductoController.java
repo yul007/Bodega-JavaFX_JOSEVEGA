@@ -5,7 +5,6 @@ import com.bodega.dao.ProductoDAO;
 import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
 import com.bodega.service.QrCodeService;
-import com.bodega.util.ValidationUtils;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -182,11 +181,10 @@ public class ProductoController {
 private void mostrarQrSeleccionado() {
     Producto seleccionado = obtenerSeleccionado();
     if (seleccionado == null) {
-        qrImageView.setImage(null);
+        Platform.runLater(() -> qrImageView.setImage(null));
         return;
     }
-    // Llamada directa al servicio que ya tienes
-    qrCodeService.generarQRCode(seleccionado, qrImageView);
+    Platform.runLater(() -> qrCodeService.generarQRCode(seleccionado, qrImageView));
 }
 
     private void configurarTabla() {
@@ -222,9 +220,9 @@ private void mostrarQrSeleccionado() {
     private void configurarSeleccionQr() {
         productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> {
             if (actual == null) {
-                qrImageView.setImage(null);
+                Platform.runLater(() -> qrImageView.setImage(null));
             } else {
-                qrCodeService.generarQRCode(actual, qrImageView);
+                Platform.runLater(() -> qrCodeService.generarQRCode(actual, qrImageView));
             }
         });
     }
@@ -236,9 +234,10 @@ private void mostrarQrSeleccionado() {
             actualizarResumenStock();
             if (!productos.isEmpty()) {
                 productosTable.getSelectionModel().selectFirst();
-                qrCodeService.generarQRCode(productosTable.getSelectionModel().getSelectedItem(), qrImageView);
+                Producto seleccionado = productosTable.getSelectionModel().getSelectedItem();
+                Platform.runLater(() -> qrCodeService.generarQRCode(seleccionado, qrImageView));
             } else {
-                qrImageView.setImage(null);
+                Platform.runLater(() -> qrImageView.setImage(null));
             }
         } catch (SQLException exception) {
             mostrarError("No se pudo cargar productos", exception.getMessage());
@@ -301,14 +300,14 @@ private void mostrarQrSeleccionado() {
 
             Producto producto = existente == null ? new Producto() : existente;
             producto.setCategoria(categoriaCombo.getValue());
-            producto.setSku(ValidationUtils.requerido(skuField.getText(), "SKU"));
-            producto.setCodigoBarras(ValidationUtils.opcional(codigoField.getText()));
-            producto.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
-            producto.setDescripcion(ValidationUtils.opcional(descripcionField.getText()));
-            producto.setUnidadMedida(ValidationUtils.requerido(unidadField.getText(), "unidad de medida"));
-            producto.setStockMinimo(parseNoNegativo(stockMinimoField.getText(), "stock minimo"));
-            producto.setStockActual(parseNoNegativo(stockActualField.getText(), "stock actual"));
-            producto.setPrecioVenta(parseNoNegativo(precioField.getText(), "precio venta"));
+            producto.setSku(skuField.getText().trim());
+            producto.setCodigoBarras(normalizarOpcional(codigoField.getText()));
+            producto.setNombre(nombreField.getText().trim());
+            producto.setDescripcion(normalizarOpcional(descripcionField.getText()));
+            producto.setUnidadMedida(unidadField.getText().trim());
+            producto.setStockMinimo(parseBigDecimal(stockMinimoField.getText(), "stock minimo"));
+            producto.setStockActual(parseBigDecimal(stockActualField.getText(), "stock actual"));
+            producto.setPrecioVenta(parseBigDecimal(precioField.getText(), "precio venta"));
             producto.setActivo(true);
             validarProducto(producto);
             return producto;
@@ -338,12 +337,20 @@ private void mostrarQrSeleccionado() {
         if (producto.getCategoria() == null) {
             throw new IllegalArgumentException("Debe seleccionar una categoria.");
         }
-        ValidationUtils.requerido(producto.getSku(), "SKU");
-        ValidationUtils.requerido(producto.getNombre(), "nombre");
-        ValidationUtils.requerido(producto.getUnidadMedida(), "unidad de medida");
-        ValidationUtils.requeridoNoNegativo(producto.getStockMinimo(), "stock minimo");
-        ValidationUtils.requeridoNoNegativo(producto.getStockActual(), "stock actual");
-        ValidationUtils.requeridoNoNegativo(producto.getPrecioVenta(), "precio venta");
+        if (estaVacio(producto.getSku())) {
+            throw new IllegalArgumentException("El SKU es obligatorio.");
+        }
+        if (estaVacio(producto.getNombre())) {
+            throw new IllegalArgumentException("El nombre es obligatorio.");
+        }
+        if (estaVacio(producto.getUnidadMedida())) {
+            throw new IllegalArgumentException("La unidad de medida es obligatoria.");
+        }
+        if (producto.getStockMinimo().compareTo(BigDecimal.ZERO) < 0
+                || producto.getStockActual().compareTo(BigDecimal.ZERO) < 0
+                || producto.getPrecioVenta().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Stock y precio no pueden ser negativos.");
+        }
     }
 
     private Producto obtenerSeleccionado() {
@@ -378,16 +385,23 @@ private void mostrarQrSeleccionado() {
         }
     }
 
-    private BigDecimal parseNoNegativo(String texto, String campo) {
+    private BigDecimal parseBigDecimal(String texto, String campo) {
         try {
-            BigDecimal valor = new BigDecimal(texto.trim().replace(",", "."));
-            if (valor.compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("El campo " + campo + " no puede ser negativo.");
-            }
-            return valor;
+            return new BigDecimal(texto.trim().replace(",", "."));
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("El campo " + campo + " debe ser numerico.");
         }
+    }
+
+    private String normalizarOpcional(String texto) {
+        if (estaVacio(texto)) {
+            return null;
+        }
+        return texto.trim();
+    }
+
+    private boolean estaVacio(String texto) {
+        return texto == null || texto.trim().isEmpty();
     }
 
     private BigDecimal valorSeguro(BigDecimal valor) {

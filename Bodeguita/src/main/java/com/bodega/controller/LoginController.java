@@ -1,6 +1,5 @@
 package com.bodega.controller;
 
-import com.bodega.App;
 import com.bodega.util.MusicPlayer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -19,9 +18,9 @@ public class LoginController {
 
     private static final String DEMO_USER = "admin";
     private static final String DEMO_PASSWORD = "admin";
+    private static final String LOGIN_SOUND = "/audio/login.mp3";
 
-    //private MusicPlayer musicPlayer = new MusicPlayer("/music/musicaFondo.mp3");
-    private MusicPlayer musicPlayer = new MusicPlayer(getClass().getResource("/music/musicaFondo.mp3").toExternalForm());
+    private final MusicPlayer loginSoundPlayer = MusicPlayer.cargarDesdeResources(LOGIN_SOUND);
 
     @FXML
     private TextField usuarioField;
@@ -38,7 +37,7 @@ public class LoginController {
         String contrasena = contrasenaField.getText() == null ? "" : contrasenaField.getText();
 
         if (DEMO_USER.equals(usuario) && DEMO_PASSWORD.equals(contrasena)) {
-            musicPlayer.stop();
+            loginSoundPlayer.play();
             abrirMenu();
             return;
         }
@@ -50,17 +49,17 @@ public class LoginController {
 
     @FXML
     private void salir() {
-        musicPlayer.stop();
+        //MusicPlayer.detenerMusicaFondo();
         Platform.exit();
     }
 
     @FXML
     private void alternarMusica() {
         if (musicaToggle.isSelected()) {
-            musicPlayer.play();
+            MusicPlayer.reanudarMusicaFondo();
             musicaToggle.setText("Musica ON");
         } else {
-            musicPlayer.pause();
+            MusicPlayer.pausarMusicaFondo();
             musicaToggle.setText("Musica OFF");
         }
     }
@@ -86,5 +85,11 @@ public class LoginController {
         alert.setHeaderText(titulo);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+        @FXML
+    public void initialize() {
+        // Esto asegura que la música de fondo empiece apenas abre el login
+        MusicPlayer.reproducirMusicaFondo();
     }
 }

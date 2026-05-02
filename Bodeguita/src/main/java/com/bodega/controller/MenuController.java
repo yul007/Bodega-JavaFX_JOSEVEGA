@@ -55,20 +55,52 @@ public class MenuController {
         navegarA("/view/dashboard.fxml", "Dashboard");
     }
 
-    private void navegarA(String rutaFxml, String tituloModulo) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource(rutaFxml));
-            Scene scene = new Scene(root, 1000, 650);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+    // private void navegarA(String rutaFxml, String tituloModulo) {
+    //     try {
+    //         Parent root = FXMLLoader.load(getClass().getResource(rutaFxml));
+    //         Scene scene = new Scene(root, 1000, 650);
+    //         scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
-            Stage stage = (Stage) usuarioActivoLabel.getScene().getWindow();
-            stage.setTitle("Bodega Master - " + tituloModulo);
-            stage.setScene(scene);
-            stage.centerOnScreen();
-        } catch (IOException | RuntimeException exception) {
-            mostrarError("No se pudo abrir " + tituloModulo, "Revisa que la pantalla exista y cargue correctamente.");
-        }
+    //         Stage stage = (Stage) usuarioActivoLabel.getScene().getWindow();
+    //         stage.setTitle("Bodega Master - " + tituloModulo);
+    //         stage.setScene(scene);
+    //         stage.centerOnScreen();
+    //     } catch (IOException | RuntimeException exception) {
+    //         mostrarError("No se pudo abrir " + tituloModulo, "Revisa que la pantalla exista y cargue correctamente.");
+    //     }
+    // }
+
+
+    private void navegarA(String rutaFxml, String tituloModulo) {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFxml));
+        Parent root = loader.load();
+        
+        // Creamos una ventana nueva (Escena secundaria)
+        Stage stageSecundario = new Stage();
+        Scene scene = new Scene(root, 1000, 650);
+        scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+
+        stageSecundario.setTitle("Bodega Master - " + tituloModulo);
+        stageSecundario.setScene(scene);
+        stageSecundario.centerOnScreen();
+
+        // Obtenemos la ventana actual (Menu Principal) y la ocultamos
+        Stage stagePrincipal = (Stage) usuarioActivoLabel.getScene().getWindow();
+        stagePrincipal.hide();
+
+        // LOGICA DE RETORNO: Cuando se cierre la secundaria, mostramos la principal
+        stageSecundario.setOnHidden(event -> {
+            stagePrincipal.show();
+        });
+
+        stageSecundario.show();
+
+    } catch (IOException | RuntimeException exception) {
+        mostrarError("No se pudo abrir " + tituloModulo, "Revisa que la pantalla exista y cargue correctamente.");
+        exception.printStackTrace(); // Esto te ayuda a ver errores en la terminal
     }
+}
 
     private void mostrarError(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

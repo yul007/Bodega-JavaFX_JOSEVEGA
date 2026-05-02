@@ -1,5 +1,6 @@
 package com.bodega;
 
+import com.bodega.util.MusicPlayer;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +20,7 @@ public class App extends Application {
         stage.setTitle("Bodeguita");
         stage.setScene(scene);
         stage.show();
+        MusicPlayer.reproducirMusicaFondo();
     }
 
     public static void main(String[] args) {

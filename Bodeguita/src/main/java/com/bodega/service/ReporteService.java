@@ -59,9 +59,13 @@ public class ReporteService {
         File carpeta = new File(CARPETA_REPORTES);
         if (!carpeta.exists()) {
             carpeta.mkdirs();
+            System.out.println("Directorio de trabajo: " + System.getProperty("user.dir"));
+System.out.println("Ruta completa del reporte: " + new File(ruta).getAbsolutePath());
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(ruta))) {
+            System.out.println("Directorio de trabajo: " + System.getProperty("user.dir"));
+System.out.println("Ruta completa del reporte: " + new File(ruta).getAbsolutePath());
             writer.write(String.join(",", cabecera) + "\n");
             for (String[] fila : datos) {
                 writer.write(String.join(",", fila) + "\n");

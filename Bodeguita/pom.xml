@@ -36,7 +36,7 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>${mysql.connector.version}</version>
         </dependency>
-    <!-- esto agrego gemini -->
+    <!-- esto GEM -->
     <dependency>
     <groupId>com.google.zxing</groupId>
     <artifactId>core</artifactId>
@@ -48,7 +48,7 @@
     <version>3.5.3</version>
 </dependency>
 
-<!-- esto agrego claude -->
+<!-- esto CLA -->
 <dependency>
     <groupId>org.openjfx</groupId>
     <artifactId>javafx-swing</artifactId>

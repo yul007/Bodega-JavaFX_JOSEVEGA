@@ -22,20 +22,11 @@ import java.util.List;
 
 public class ReporteController {
 
-    @FXML
-    private ComboBox<String> comboTipoReporte;
-
-    @FXML
-    private ComboBox<Producto> comboProducto;
-
-    @FXML
-    private ComboBox<Proveedor> comboProveedor;
-
-    @FXML
-    private DatePicker dateDesde;
-
-    @FXML
-    private DatePicker dateHasta;
+    @FXML private ComboBox<String> comboTipoReporte;
+    @FXML private ComboBox<Producto> comboProducto;
+    @FXML private ComboBox<Proveedor> comboProveedor;
+    @FXML private DatePicker dateDesde;
+    @FXML private DatePicker dateHasta;
 
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final ProveedorDAO proveedorDAO = new ProveedorDAO();
@@ -43,26 +34,23 @@ public class ReporteController {
     private final LoteDAO loteDAO = new LoteDAO();
     private final NotaSalidaDAO notaSalidaDAO = new NotaSalidaDAO();
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         comboTipoReporte.setItems(FXCollections.observableArrayList(
                 "Kardex por Producto",
                 "Notas de Salida por Periodo",
                 "Compras por Proveedor",
-                "Productos con Stock Bajo",
-                "Valor Actual de Inventario"
+                "Productos con Stock Bajo"//,
+                //"Valor Actual de Inventario"
         ));
 
         cargarFiltros();
     }
 
-    @FXML
-    public void onExportarCSV() {
+    @FXML public void onExportarCSV() {
         generarReporte("csv");
     }
 
-    @FXML
-    public void onExportarTXT() {
+    @FXML public void onExportarTXT() {
         generarReporte("txt");
     }
 
@@ -93,9 +81,6 @@ public class ReporteController {
                     break;
                 case "Productos con Stock Bajo":
                     ReporteService.generarReporteProductosConStockBajo(construirStockBajo());
-                    break;
-                case "Valor Actual de Inventario":
-                    ReporteService.generarReporteValorInventario(construirValorInventarioTotal(), construirInventarioActual());
                     break;
                 default:
                     throw new IllegalArgumentException("Tipo de reporte no reconocido.");
@@ -178,28 +163,6 @@ public class ReporteController {
                     .toList();
         } catch (Exception e) {
             throw new IOException("No se pudo construir el reporte de stock bajo: " + e.getMessage(), e);
-        }
-    }
-
-    private List<String[]> construirInventarioActual() throws IOException {
-        try {
-            return kardexDAO.listarResumenInventarioActual().stream()
-                    .map(fila -> new String[] {
-                            String.valueOf(fila[0]),
-                            valorTexto((BigDecimal) fila[1]),
-                            valorTexto((BigDecimal) fila[2])
-                    })
-                    .toList();
-        } catch (Exception e) {
-            throw new IOException("No se pudo construir el inventario actual: " + e.getMessage(), e);
-        }
-    }
-
-    private BigDecimal construirValorInventarioTotal() throws IOException {
-        try {
-            return kardexDAO.calcularValorInventarioActual();
-        } catch (Exception e) {
-            throw new IOException("No se pudo calcular el valor de inventario: " + e.getMessage(), e);
         }
     }
 

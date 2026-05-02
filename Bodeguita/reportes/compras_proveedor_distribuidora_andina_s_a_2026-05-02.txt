@@ -1,4 +1,4 @@
-REPORTE DE COMPRAS POR PROVEEDOR
+REPORTE DE COMPRAS POR PROVEEDOR: Distribuidora Andina S.A.
 
 2026-05-01 | Agua de Coco | 10.00 | 1.00
 2026-05-01 | Agua de Coco | 6.00 | 0.50

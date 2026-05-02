@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 /** Representa un movimiento valorado de entrada o salida en el Kardex. */
 public class MovimientoKardex {
-
     private int idMovimiento;
     private Producto producto;
     private Lote lote;
@@ -57,131 +56,36 @@ public class MovimientoKardex {
         this.observacion = observacion;
     }
 
-    public int getIdMovimiento() {
-        return idMovimiento;
-    }
-
-    public void setIdMovimiento(int idMovimiento) {
-        this.idMovimiento = idMovimiento;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Lote getLote() {
-        return lote;
-    }
-
-    public void setLote(Lote lote) {
-        this.lote = lote;
-    }
-
-    public NotaSalida getNotaSalida() {
-        return notaSalida;
-    }
-
-    public void setNotaSalida(NotaSalida notaSalida) {
-        this.notaSalida = notaSalida;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getReferencia() {
-        return referencia;
-    }
-
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
-
-    public BigDecimal getCantidadEntrada() {
-        return cantidadEntrada;
-    }
-
-    public void setCantidadEntrada(BigDecimal cantidadEntrada) {
-        this.cantidadEntrada = cantidadEntrada;
-    }
-
-    public BigDecimal getCostoUnitarioEntrada() {
-        return costoUnitarioEntrada;
-    }
-
-    public void setCostoUnitarioEntrada(BigDecimal costoUnitarioEntrada) {
-        this.costoUnitarioEntrada = costoUnitarioEntrada;
-    }
-
-    public BigDecimal getValorEntrada() {
-        return valorEntrada;
-    }
-
-    public void setValorEntrada(BigDecimal valorEntrada) {
-        this.valorEntrada = valorEntrada;
-    }
-
-    public BigDecimal getCantidadSalida() {
-        return cantidadSalida;
-    }
-
-    public void setCantidadSalida(BigDecimal cantidadSalida) {
-        this.cantidadSalida = cantidadSalida;
-    }
-
-    public BigDecimal getCostoUnitarioSalida() {
-        return costoUnitarioSalida;
-    }
-
-    public void setCostoUnitarioSalida(BigDecimal costoUnitarioSalida) {
-        this.costoUnitarioSalida = costoUnitarioSalida;
-    }
-
-    public BigDecimal getValorSalida() {
-        return valorSalida;
-    }
-
-    public void setValorSalida(BigDecimal valorSalida) {
-        this.valorSalida = valorSalida;
-    }
-
-    public BigDecimal getSaldoCantidad() {
-        return saldoCantidad;
-    }
-
-    public void setSaldoCantidad(BigDecimal saldoCantidad) {
-        this.saldoCantidad = saldoCantidad;
-    }
-
-    public BigDecimal getSaldoValor() {
-        return saldoValor;
-    }
-
-    public void setSaldoValor(BigDecimal saldoValor) {
-        this.saldoValor = saldoValor;
-    }
-
-    public String getObservacion() {
-        return observacion;
-    }
-
-    public void setObservacion(String observacion) {
-        this.observacion = observacion;
-    }
+    public int getIdMovimiento() { return idMovimiento; }
+    public void setIdMovimiento(int idMovimiento) { this.idMovimiento = idMovimiento; }
+    public Producto getProducto() { return producto; }
+    public void setProducto(Producto producto) { this.producto = producto; }
+    public Lote getLote() { return lote; }
+    public void setLote(Lote lote) { this.lote = lote; }
+    public NotaSalida getNotaSalida() { return notaSalida; }
+    public void setNotaSalida(NotaSalida notaSalida) { this.notaSalida = notaSalida; }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+    public String getReferencia() { return referencia; }
+    public void setReferencia(String referencia) { this.referencia = referencia; }
+    public BigDecimal getCantidadEntrada() { return cantidadEntrada; }
+    public void setCantidadEntrada(BigDecimal cantidadEntrada) { this.cantidadEntrada = cantidadEntrada; }
+    public BigDecimal getCostoUnitarioEntrada() { return costoUnitarioEntrada; }
+    public void setCostoUnitarioEntrada(BigDecimal costoUnitarioEntrada) { this.costoUnitarioEntrada = costoUnitarioEntrada; }
+    public BigDecimal getValorEntrada() { return valorEntrada; }
+    public void setValorEntrada(BigDecimal valorEntrada) { this.valorEntrada = valorEntrada; }
+    public BigDecimal getCantidadSalida() { return cantidadSalida; }
+    public void setCantidadSalida(BigDecimal cantidadSalida) { this.cantidadSalida = cantidadSalida; }
+    public BigDecimal getCostoUnitarioSalida() { return costoUnitarioSalida; }
+    public void setCostoUnitarioSalida(BigDecimal costoUnitarioSalida) { this.costoUnitarioSalida = costoUnitarioSalida; }
+    public BigDecimal getValorSalida() { return valorSalida; }
+    public void setValorSalida(BigDecimal valorSalida) { this.valorSalida = valorSalida; }
+    public BigDecimal getSaldoCantidad() { return saldoCantidad; }
+    public void setSaldoCantidad(BigDecimal saldoCantidad) { this.saldoCantidad = saldoCantidad; }
+    public BigDecimal getSaldoValor() { return saldoValor; }
+    public void setSaldoValor(BigDecimal saldoValor) { this.saldoValor = saldoValor; }
+    public String getObservacion() { return observacion; }
+    public void setObservacion(String observacion) { this.observacion = observacion; }
 }

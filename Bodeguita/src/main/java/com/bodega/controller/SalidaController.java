@@ -22,47 +22,20 @@ import java.sql.SQLException;
 
 public class SalidaController {
 
-    @FXML
-    private ComboBox<Cliente> comboCliente;
-
-    @FXML
-    private DatePicker dateFecha;
-
-    @FXML
-    private TextField txtNumeroFactura;
-
-    @FXML
-    private ComboBox<Producto> comboProducto;
-
-    @FXML
-    private TextField txtCantidad;
-
-    @FXML
-    private TextField txtPrecioUnitario;
-
-    @FXML
-    private TableView<DetalleSalida> detalleTable;
-
-    @FXML
-    private TableColumn<DetalleSalida, String> colProducto;
-
-    @FXML
-    private TableColumn<DetalleSalida, Integer> colCantidad;
-
-    @FXML
-    private TableColumn<DetalleSalida, BigDecimal> colPrecioUnitario;
-
-    @FXML
-    private TableColumn<DetalleSalida, BigDecimal> colSubtotal;
-
-    @FXML
-    private Label lblSubtotal;
-
-    @FXML
-    private Label lblIva;
-
-    @FXML
-    private Label lblTotal;
+    @FXML private ComboBox<Cliente> comboCliente;
+    @FXML private DatePicker dateFecha;
+    @FXML private TextField txtNumeroFactura;
+    @FXML private ComboBox<Producto> comboProducto;
+    @FXML private TextField txtCantidad;
+    @FXML private TextField txtPrecioUnitario;
+    @FXML private TableView<DetalleSalida> detalleTable;
+    @FXML private TableColumn<DetalleSalida, String> colProducto;
+    @FXML private TableColumn<DetalleSalida, Integer> colCantidad;
+    @FXML private TableColumn<DetalleSalida, BigDecimal> colPrecioUnitario;
+    @FXML private TableColumn<DetalleSalida, BigDecimal> colSubtotal;
+    @FXML private Label lblSubtotal; 
+    @FXML private Label lblIva;
+    @FXML private Label lblTotal;
 
     private ObservableList<DetalleSalida> detalles;
     private ObservableList<Producto> productos;
@@ -73,8 +46,7 @@ public class SalidaController {
     private NotaSalidaDAO notaSalidaDAO;
     private NotaSalidaService notaSalidaService;
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         productoDAO = new ProductoDAO();
         clienteDAO = new ClienteDAO();
         notaSalidaDAO = new NotaSalidaDAO();
@@ -126,8 +98,7 @@ public class SalidaController {
         }
     }
 
-    @FXML
-    public void onAgregarDetalle() {
+    @FXML public void onAgregarDetalle() {
         try {
             Producto producto = comboProducto.getValue();
             BigDecimal cantidad = parsePositive(txtCantidad.getText(), "cantidad");
@@ -163,8 +134,7 @@ public class SalidaController {
         }
     }
     
-    @FXML
-    public void onEliminarDetalle() {
+    @FXML public void onEliminarDetalle() {
         DetalleSalida selected = detalleTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             mostrarMensaje("Seleccione un detalle para eliminar.", "Información", Alert.AlertType.INFORMATION);
@@ -175,8 +145,7 @@ public class SalidaController {
         actualizarTotales();
     }
 
-    @FXML
-    public void onGenerarFactura() {
+    @FXML public void onGenerarFactura() {
         try {
             Cliente cliente = comboCliente.getValue();
             LocalDate fecha = dateFecha.getValue();
@@ -286,8 +255,7 @@ public class SalidaController {
         }
     }
 
-    @FXML
-    public void onCancelar() {
+    @FXML public void onCancelar() {
         limpiarFormularioCabecera();
         detalles.clear();
         actualizarTotales();

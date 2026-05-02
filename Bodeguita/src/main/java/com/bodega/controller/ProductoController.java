@@ -38,38 +38,22 @@ public class ProductoController {
     private final QrCodeService qrCodeService = new QrCodeService();
     private final ObservableList<Producto> productos = FXCollections.observableArrayList();
 
-    @FXML
-    private TextField buscadorField;
-
-    @FXML
-    private TableView<Producto> productosTable;
-
-    @FXML
-    private TableColumn<Producto, Integer> idColumn;
-
-    @FXML     private TableColumn<Producto, String> nombreColumn;
-
-    @FXML
-    private TableColumn<Producto, String> categoriaColumn;
-
-    @FXML
-    private TableColumn<Producto, BigDecimal> stockColumn;
-
-    @FXML
-    private TableColumn<Producto, BigDecimal> stockMinimoColumn;
-
-    @FXML
-    private ImageView qrImageView;
-
-    @FXML
-    private void initialize() {
+    @FXML private TextField buscadorField;
+    @FXML private TableView<Producto> productosTable;
+    @FXML private TableColumn<Producto, Integer> idColumn;
+    @FXML private TableColumn<Producto, String> nombreColumn;
+    @FXML private TableColumn<Producto, String> categoriaColumn;
+    @FXML private TableColumn<Producto, BigDecimal> stockColumn;
+    @FXML private TableColumn<Producto, BigDecimal> stockMinimoColumn;
+    @FXML private ImageView qrImageView;
+    
+    @FXML private void initialize() {
         configurarTabla();
         configurarSeleccionQr();
         cargarProductos();
     }
 
-    @FXML
-    private void nuevoProducto() {
+    @FXML private void nuevoProducto() {
         abrirDialogoProducto(null).ifPresent(producto -> {
             try {
                 productoDAO.crear(producto);
@@ -81,21 +65,21 @@ public class ProductoController {
         });
     }
 
-    @FXML
-    private void buscarProducto() {
+    @FXML private void buscarProducto() {
         String texto = buscadorField.getText() == null ? "" : buscadorField.getText().trim();
         try {
             List<Producto> resultado = texto.isEmpty()
                     ? productoDAO.listarActivos()
-                    : productoDAO.buscarPorNombreOCodigo(texto);
+                    : productoDAO.buscarPorNombre(texto);
             productos.setAll(resultado);
         } catch (SQLException exception) {
             mostrarError("No se pudo buscar productos", exception.getMessage());
         }
     }
 
-    @FXML
-    private void editarProducto() {
+    
+
+    @FXML private void editarProducto() {
         Producto seleccionado = obtenerSeleccionado();
         if (seleccionado == null) {
             return;
@@ -112,8 +96,7 @@ public class ProductoController {
         });
     }
 
-    @FXML
-    private void inactivarProducto() {
+    @FXML private void inactivarProducto() {
         Producto seleccionado = obtenerSeleccionado();
         if (seleccionado == null) {
             return;
@@ -137,25 +120,22 @@ public class ProductoController {
         }
     }
 
-    @FXML
-    private void verLotes() {
+    @FXML private void verLotes() {
         if (obtenerSeleccionado() != null) {
             navegarA("/view/lotes.fxml", "Lotes");
         }
     }
 
-    @FXML
-    private void nuevaSalida() {
+    @FXML private void nuevaSalida() {
         if (obtenerSeleccionado() != null) {
             navegarA("/view/salidas.fxml", "Salidas");
         }
     }
 
-    private void configurarTabla() {
+    private void configurarTabla() { //este metodo hace 
         idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto()));
         nombreColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
-        categoriaColumn.setCellValueFactory(data -> {
-            Categoria categoria = data.getValue().getCategoria();
+        categoriaColumn.setCellValueFactory(data -> { Categoria categoria = data.getValue().getCategoria();
             return new SimpleStringProperty(categoria == null ? "" : categoria.getNombre());
         });
         stockColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getStockActual()));

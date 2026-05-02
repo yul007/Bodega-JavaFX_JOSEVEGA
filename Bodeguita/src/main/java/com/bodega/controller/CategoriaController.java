@@ -16,23 +16,15 @@ import java.util.Optional;
 
 public class CategoriaController {
 
-    @FXML
-    private TableView<Categoria> categoriaTable;
-
-    @FXML
-    private TableColumn<Categoria, String> colId;
-
-    @FXML
-    private TableColumn<Categoria, String> colNombre;
-
-    @FXML
-    private TableColumn<Categoria, String> colDescripcion;
-
+    @FXML private TableView<Categoria> categoriaTable;
+    @FXML private TableColumn<Categoria, String> colId;
+    @FXML private TableColumn<Categoria, String> colNombre;
+    @FXML private TableColumn<Categoria, String> colDescripcion;
+    
     private ObservableList<Categoria> categorias;
     private CategoriaDAO categoriaDAO;
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         categoriaDAO = new CategoriaDAO();
         categorias = FXCollections.observableArrayList();
 
@@ -52,8 +44,7 @@ public class CategoriaController {
         }
     }
 
-    @FXML
-    public void onNuevaCategoria() {
+    @FXML public void onNuevaCategoria() {
         Dialog<Categoria> dialog = new Dialog<>();
         dialog.setTitle("Nueva Categoría");
         dialog.setHeaderText("Crear nueva categoría");
@@ -103,8 +94,7 @@ public class CategoriaController {
         });
     }
 
-    @FXML
-    public void onEditarCategoria() {
+    @FXML public void onEditarCategoria() {
         Categoria selected = categoriaTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert("Seleccione una categoría para editar.", "Información", Alert.AlertType.INFORMATION);
@@ -158,8 +148,7 @@ public class CategoriaController {
         });
     }
 
-    @FXML
-    public void onInactivarCategoria() {
+    @FXML public void onInactivarCategoria() {
         Categoria selected = categoriaTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert("Seleccione una categoría para inactivar.", "Información", Alert.AlertType.INFORMATION);
@@ -184,8 +173,7 @@ public class CategoriaController {
         }
     }
 
-    @FXML
-    public void onRefrescar() {
+    @FXML public void onRefrescar() {
         loadCategorias();
     }
 

@@ -24,48 +24,24 @@ import java.util.List;
 /** Controlador del Kardex valorado con filtros por producto y fecha. */
 public class KardexController {
 
-    @FXML
-    private ComboBox<Producto> comboProducto;
-
-    @FXML
-    private DatePicker dateDesde;
-
-    @FXML
-    private DatePicker dateHasta;
-
-    @FXML
-    private TableView<MovimientoKardex> kardexTable;
-
-    @FXML
-    private TableColumn<MovimientoKardex, LocalDate> colFecha;
-
-    @FXML
-    private TableColumn<MovimientoKardex, String> colTipo;
-
-    @FXML
-    private TableColumn<MovimientoKardex, BigDecimal> colCantidad;
-
-    @FXML
-    private TableColumn<MovimientoKardex, BigDecimal> colCostoUnitario;
-
-    @FXML
-    private TableColumn<MovimientoKardex, BigDecimal> colSaldoCantidad;
-
-    @FXML
-    private TableColumn<MovimientoKardex, BigDecimal> colSaldoValor;
-
-    @FXML
-    private TableColumn<MovimientoKardex, String> colReferencia;
-
-    @FXML
-    private Label lblResumenKardex;
+    @FXML private ComboBox<Producto> comboProducto;
+    @FXML private DatePicker dateDesde;
+    @FXML private DatePicker dateHasta;
+    @FXML private TableView<MovimientoKardex> kardexTable;
+    @FXML private TableColumn<MovimientoKardex, LocalDate> colFecha;
+    @FXML private TableColumn<MovimientoKardex, String> colTipo;
+    @FXML private TableColumn<MovimientoKardex, BigDecimal> colCantidad;
+    @FXML private TableColumn<MovimientoKardex, BigDecimal> colCostoUnitario;
+    @FXML private TableColumn<MovimientoKardex, BigDecimal> colSaldoCantidad;
+    @FXML private TableColumn<MovimientoKardex, BigDecimal> colSaldoValor;
+    @FXML private TableColumn<MovimientoKardex, String> colReferencia;
+    @FXML private Label lblResumenKardex;
 
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final KardexDAO kardexDAO = new KardexDAO();
     private final ObservableList<MovimientoKardex> movimientos = FXCollections.observableArrayList();
 
-    @FXML
-    private void initialize() {
+    @FXML private void initialize() {
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
         colCantidad.setCellValueFactory(cell -> {
@@ -92,13 +68,11 @@ public class KardexController {
         cargarKardex();
     }
 
-    @FXML
-    private void onFiltrar() {
+    @FXML private void onFiltrar() {
         cargarKardex();
     }
 
-    @FXML
-    private void onLimpiar() {
+    @FXML private void onLimpiar() {
         comboProducto.setValue(null);
         dateDesde.setValue(LocalDate.now().minusDays(30));
         dateHasta.setValue(LocalDate.now());

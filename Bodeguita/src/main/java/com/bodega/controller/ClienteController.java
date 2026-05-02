@@ -27,41 +27,22 @@ public class ClienteController {
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ObservableList<Cliente> clientes = FXCollections.observableArrayList();
 
-    @FXML
-    private TextField buscadorField;
-
-    @FXML
-    private TableView<Cliente> clientesTable;
-
-    @FXML
-    private TableColumn<Cliente, Number> idColumn;
-
-    @FXML
-    private TableColumn<Cliente, String> identificacionColumn;
-
-    @FXML
-    private TableColumn<Cliente, String> nombreColumn;
-
-    @FXML
-    private TableColumn<Cliente, String> telefonoColumn;
-
-    @FXML
-    private TableColumn<Cliente, String> emailColumn;
-
-    @FXML
-    private TableColumn<Cliente, String> direccionColumn;
-
-    @FXML
-    private Label resumenLabel;
-
-    @FXML
-    private void initialize() {
+    @FXML private TextField buscadorField;
+    @FXML private TableView<Cliente> clientesTable;
+    @FXML private TableColumn<Cliente, Number> idColumn;
+    @FXML private TableColumn<Cliente, String> identificacionColumn;
+    @FXML private TableColumn<Cliente, String> nombreColumn;
+    @FXML private TableColumn<Cliente, String> telefonoColumn;
+    @FXML private TableColumn<Cliente, String> emailColumn;
+    @FXML private TableColumn<Cliente, String> direccionColumn;
+    @FXML private Label resumenLabel;
+    
+    @FXML private void initialize() {
         configurarTabla();
         cargarClientes();
     }
 
-    @FXML
-    private void nuevoCliente() {
+    @FXML private void nuevoCliente() {
         abrirDialogoCliente(null).ifPresent(cliente -> {
             try {
                 clienteDAO.crear(cliente);
@@ -73,8 +54,7 @@ public class ClienteController {
         });
     }
 
-    @FXML
-    private void buscarCliente() {
+    @FXML private void buscarCliente() {
         String texto = buscadorField.getText() == null ? "" : buscadorField.getText().trim();
         try {
             List<Cliente> resultado = texto.isEmpty()
@@ -87,8 +67,7 @@ public class ClienteController {
         }
     }
 
-    @FXML
-    private void editarCliente() {
+    @FXML private void editarCliente() {
         Cliente seleccionado = obtenerSeleccionado();
         if (seleccionado == null) {
             return;
@@ -105,8 +84,7 @@ public class ClienteController {
         });
     }
 
-    @FXML
-    private void inactivarCliente() {
+    @FXML private void inactivarCliente() {
         Cliente seleccionado = obtenerSeleccionado();
         if (seleccionado == null) {
             return;
@@ -130,8 +108,7 @@ public class ClienteController {
         }
     }
 
-    @FXML
-    private void listarClientes() {
+    @FXML private void listarClientes() {
         buscadorField.clear();
         cargarClientes();
     }

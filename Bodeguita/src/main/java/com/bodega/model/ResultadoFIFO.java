@@ -7,7 +7,6 @@ import java.util.List;
 
 /** Resultado calculado despues de aplicar FIFO a una salida de inventario. */
 public class ResultadoFIFO {
-
     private Producto producto;
     private BigDecimal cantidadSolicitada;
     private BigDecimal costoTotal;
@@ -33,51 +32,16 @@ public class ResultadoFIFO {
         this.detalles = new ArrayList<>(detalles);
     }
 
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public BigDecimal getCantidadSolicitada() {
-        return cantidadSolicitada;
-    }
-
-    public void setCantidadSolicitada(BigDecimal cantidadSolicitada) {
-        this.cantidadSolicitada = cantidadSolicitada;
-    }
-
-    public BigDecimal getCostoTotal() {
-        return costoTotal;
-    }
-
-    public void setCostoTotal(BigDecimal costoTotal) {
-        this.costoTotal = costoTotal;
-    }
-
-    public BigDecimal getStockAnterior() {
-        return stockAnterior;
-    }
-
-    public void setStockAnterior(BigDecimal stockAnterior) {
-        this.stockAnterior = stockAnterior;
-    }
-
-    public BigDecimal getStockNuevo() {
-        return stockNuevo;
-    }
-
-    public void setStockNuevo(BigDecimal stockNuevo) {
-        this.stockNuevo = stockNuevo;
-    }
-
-    public List<DetalleFIFO> getDetalles() {
-        return Collections.unmodifiableList(detalles);
-    }
-
-    public void setDetalles(List<DetalleFIFO> detalles) {
-        this.detalles = new ArrayList<>(detalles);
-    }
+    public Producto getProducto() { return producto; }
+    public void setProducto(Producto producto) { this.producto = producto; }
+    public BigDecimal getCantidadSolicitada() { return cantidadSolicitada; }
+    public void setCantidadSolicitada(BigDecimal cantidadSolicitada) { this.cantidadSolicitada = cantidadSolicitada; }
+    public BigDecimal getCostoTotal() { return costoTotal; }
+    public void setCostoTotal(BigDecimal costoTotal) { this.costoTotal = costoTotal; }
+    public BigDecimal getStockAnterior() { return stockAnterior; }
+    public void setStockAnterior(BigDecimal stockAnterior) { this.stockAnterior = stockAnterior; }
+    public BigDecimal getStockNuevo() { return stockNuevo; }
+    public void setStockNuevo(BigDecimal stockNuevo) { this.stockNuevo = stockNuevo; }
+    public List<DetalleFIFO> getDetalles() { return Collections.unmodifiableList(detalles); }
+    public void setDetalles(List<DetalleFIFO> detalles) { this.detalles = new ArrayList<>(detalles); }
 }

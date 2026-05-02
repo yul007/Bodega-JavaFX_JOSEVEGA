@@ -26,27 +26,13 @@ import java.util.Map;
 
 public class DashboardController {
 
-    @FXML
-    private Label lblValorInventario;
-
-    @FXML
-    private TableView<Map<String, Object>> tablaStockBajo;
-
-    @FXML
-    private TableColumn<Map<String, Object>, String> colProductoStock;
-
-    @FXML
-    private TableColumn<Map<String, Object>, Integer> colStockActual;
-
-    @FXML
-    private TableColumn<Map<String, Object>, Integer> colStockMinimo;
-
-    @FXML
-    private PieChart chartTopVendidos;
-
-    @FXML
-    private LineChart<String, Number> chartVentas30Dias;
-
+    @FXML private Label lblValorInventario;
+    @FXML private TableView<Map<String, Object>> tablaStockBajo;
+    @FXML private TableColumn<Map<String, Object>, String> colProductoStock;
+    @FXML private TableColumn<Map<String, Object>, Integer> colStockActual;
+    @FXML private TableColumn<Map<String, Object>, Integer> colStockMinimo;
+    @FXML private PieChart chartTopVendidos;
+    @FXML private LineChart<String, Number> chartVentas30Dias;
     private ObservableList<Map<String, Object>> stockBajoData;
 
     private final ProductoDAO productoDAO = new ProductoDAO();

@@ -22,17 +22,11 @@ public class LoginController {
 
     private final MusicPlayer loginSoundPlayer = MusicPlayer.cargarDesdeResources(LOGIN_SOUND);
 
-    @FXML
-    private TextField usuarioField;
+    @FXML private TextField usuarioField;
+    @FXML private PasswordField contrasenaField;
+    @FXML private ToggleButton musicaToggle;
 
-    @FXML
-    private PasswordField contrasenaField;
-
-    @FXML
-    private ToggleButton musicaToggle;
-
-    @FXML
-    private void ingresar() {
+    @FXML private void ingresar() {
         String usuario = usuarioField.getText() == null ? "" : usuarioField.getText().trim();
         String contrasena = contrasenaField.getText() == null ? "" : contrasenaField.getText();
 
@@ -47,14 +41,12 @@ public class LoginController {
         contrasenaField.requestFocus();
     }
 
-    @FXML
-    private void salir() {
+    @FXML private void salir() {
         //MusicPlayer.detenerMusicaFondo();
         Platform.exit();
     }
 
-    @FXML
-    private void alternarMusica() {
+    @FXML private void alternarMusica() {
         if (musicaToggle.isSelected()) {
             MusicPlayer.reanudarMusicaFondo();
             musicaToggle.setText("Musica ON");
@@ -87,8 +79,7 @@ public class LoginController {
         alert.showAndWait();
     }
 
-        @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         // Esto asegura que la música de fondo empiece apenas abre el login
         MusicPlayer.reproducirMusicaFondo();
     }

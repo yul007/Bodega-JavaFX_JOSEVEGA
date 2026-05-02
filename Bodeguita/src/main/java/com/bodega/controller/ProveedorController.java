@@ -15,29 +15,17 @@ import java.util.Optional;
 
 public class ProveedorController {
 
-    @FXML
-    private TableView<Proveedor> proveedorTable;
-
-    @FXML
-    private TableColumn<Proveedor, String> colRuc;
-
-    @FXML
-    private TableColumn<Proveedor, String> colNombre;
-
-    @FXML
-    private TableColumn<Proveedor, String> colContacto;
-
-    @FXML
-    private TableColumn<Proveedor, String> colTelefono;
-
-    @FXML
-    private TableColumn<Proveedor, String> colEmail;
+    @FXML private TableView<Proveedor> proveedorTable;
+    @FXML private TableColumn<Proveedor, String> colRuc;
+    @FXML private TableColumn<Proveedor, String> colNombre;
+    @FXML private TableColumn<Proveedor, String> colContacto;
+    @FXML private TableColumn<Proveedor, String> colTelefono;
+    @FXML private TableColumn<Proveedor, String> colEmail;
 
     private ObservableList<Proveedor> proveedores;
     private ProveedorDAO proveedorDAO;
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         proveedorDAO = new ProveedorDAO();
         proveedores = FXCollections.observableArrayList();
 
@@ -59,8 +47,7 @@ public class ProveedorController {
         }
     }
 
-    @FXML
-    public void onNuevoProveedor() {
+    @FXML public void onNuevoProveedor() {
         Dialog<Proveedor> dialog = new Dialog<>();
         dialog.setTitle("Nuevo Proveedor");
         dialog.setHeaderText("Crear nuevo proveedor");
@@ -130,8 +117,7 @@ public class ProveedorController {
         });
     }
 
-    @FXML
-    public void onEditarProveedor() {
+    @FXML public void onEditarProveedor() {
         Proveedor selected = proveedorTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert("Seleccione un proveedor para editar.", "Información", Alert.AlertType.INFORMATION);
@@ -205,8 +191,7 @@ public class ProveedorController {
         });
     }
 
-    @FXML
-    public void onInactivarProveedor() {
+    @FXML public void onInactivarProveedor() {
         Proveedor selected = proveedorTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert("Seleccione un proveedor para inactivar.", "Información", Alert.AlertType.INFORMATION);
@@ -231,8 +216,7 @@ public class ProveedorController {
         }
     }
 
-    @FXML
-    public void onRefrescar() {
+    @FXML public void onRefrescar() {
         loadProveedores();
     }
 

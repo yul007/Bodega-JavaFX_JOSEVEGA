@@ -32,7 +32,7 @@ public class ReporteService {
     public static void generarReporteComprasPorProveedor(Proveedor proveedor, List<String[]> datos) throws IOException {
         String base = CARPETA_REPORTES + "/compras_proveedor_" + sanitizar(proveedor.getNombre()) + "_" + LocalDate.now();
         generarCSV(base + ".csv", new String[]{"Fecha", "Producto", "Cantidad", "Costo Unitario"}, datos);
-        generarTXT(base + ".txt", "REPORTE DE COMPRAS POR PROVEEDOR", datos);
+        generarTXT(base + ".txt", "REPORTE DE COMPRAS POR PROVEEDOR: " + proveedor.getNombre(), datos);
     }
 
     public static void generarReporteProductosConStockBajo(List<String[]> datos) throws IOException {
@@ -41,19 +41,6 @@ public class ReporteService {
         generarTXT(base + ".txt", "REPORTE DE STOCK BAJO", datos);
     }
 
-    public static void generarReporteValorInventario(BigDecimal valorTotal, List<String[]> datos) throws IOException {
-        String base = CARPETA_REPORTES + "/valor_inventario_" + LocalDate.now();
-        generarCSV(base + ".csv", new String[]{"Producto", "Cantidad", "Valor Total"}, datos);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(base + ".txt"))) {
-            writer.write("REPORTE DE VALOR DE INVENTARIO\n");
-            writer.write("Valor Total: $" + valorTotal + "\n\n");
-            writer.write(String.format("%-24s %-12s %-12s\n", "Producto", "Cantidad", "Valor Total"));
-            for (String[] fila : datos) {
-                writer.write(String.format("%-24s %-12s %-12s\n",
-                        safe(fila, 0), safe(fila, 1), safe(fila, 2)));
-            }
-        }
-    }
 
     private static void generarCSV(String ruta, String[] cabecera, List<String[]> datos) throws IOException {
         File carpeta = new File(CARPETA_REPORTES);

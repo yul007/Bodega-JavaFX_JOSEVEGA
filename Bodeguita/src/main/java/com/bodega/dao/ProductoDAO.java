@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import com.bodega.util.ValidationUtils;
 
-/** DAO para productos, busquedas por codigo/nombre y consultas de stock. */
+/** DAO para productos y consultas de stock. */
 public class ProductoDAO {
 
     private static final String SELECT_PRODUCTO_CON_CATEGORIA = """
@@ -111,10 +111,10 @@ public class ProductoDAO {
         return Optional.empty();
     }
 
-    public List<Producto> buscarPorNombreOCodigo(String texto) throws SQLException {
+    public List<Producto> buscarPorNombre(String texto) throws SQLException {
         String sql = SELECT_PRODUCTO_CON_CATEGORIA
                 + """
-                  WHERE p.nombre LIKE ? OR p.sku LIKE ? OR p.codigo_barras LIKE ?
+                  WHERE p.nombre LIKE ?
                   ORDER BY p.nombre
                   """;
 
@@ -122,8 +122,6 @@ public class ProductoDAO {
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             String filtro = "%" + texto + "%";
             statement.setString(1, filtro);
-            statement.setString(2, filtro);
-            statement.setString(3, filtro);
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<Producto> productos = new ArrayList<>();
                 while (resultSet.next()) {

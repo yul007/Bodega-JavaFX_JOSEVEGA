@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 /** Representa la cabecera de una nota de salida o venta. */
 public class NotaSalida {
-
     private int idSalida;
     private Cliente cliente;
     private String numeroFactura;
@@ -44,96 +43,29 @@ public class NotaSalida {
         this.observaciones = observaciones;
     }
 
-    public int getIdSalida() {
-        return idSalida;
-    }
-
-    public void setIdSalida(int idSalida) {
-        this.idSalida = idSalida;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public String getNumeroFactura() {
-        return numeroFactura;
-    }
-
-    public void setNumeroFactura(String numeroFactura) {
-        this.numeroFactura = numeroFactura;
-    }
-
-    public LocalDate getFechaEmision() {
-        return fechaEmision;
-    }
-
-    public void setFechaEmision(LocalDate fechaEmision) {
-        this.fechaEmision = fechaEmision;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
-
-    public BigDecimal getIva() {
-        return iva;
-    }
-
-    public void setIva(BigDecimal iva) {
-        this.iva = iva;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
-    public BigDecimal getCostoTotalFifo() {
-        return costoTotalFifo;
-    }
-
-    public void setCostoTotalFifo(BigDecimal costoTotalFifo) {
-        this.costoTotalFifo = costoTotalFifo;
-    }
-
-    public BigDecimal getUtilidad() {
-        return utilidad;
-    }
-
-    public void setUtilidad(BigDecimal utilidad) {
-        this.utilidad = utilidad;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+    public int getIdSalida() { return idSalida; }
+    public void setIdSalida(int idSalida) { this.idSalida = idSalida; }
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+    public String getNumeroFactura() { return numeroFactura; }
+    public void setNumeroFactura(String numeroFactura) { this.numeroFactura = numeroFactura; }
+    public LocalDate getFechaEmision() { return fechaEmision; }
+    public void setFechaEmision(LocalDate fechaEmision) { this.fechaEmision = fechaEmision; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getIva() { return iva; }
+    public void setIva(BigDecimal iva) { this.iva = iva; }
+    public BigDecimal getTotal() { return total; }
+    public void setTotal(BigDecimal total) { this.total = total; }
+    public BigDecimal getCostoTotalFifo() { return costoTotalFifo; }
+    public void setCostoTotalFifo(BigDecimal costoTotalFifo) { this.costoTotalFifo = costoTotalFifo; }
+    public BigDecimal getUtilidad() { return utilidad; }
+    public void setUtilidad(BigDecimal utilidad) { this.utilidad = utilidad; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    public String getObservaciones() { return observaciones; }
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
     @Override
-    public String toString() {
-        return numeroFactura;
-    }
+    public String toString() { return numeroFactura; }
 }

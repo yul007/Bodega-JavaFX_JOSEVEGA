@@ -20,41 +20,18 @@ import java.time.LocalDate;
 
 public class LoteController {
 
-    @FXML
-    private TableView<Lote> loteTable;
-
-    @FXML
-    private TableColumn<Lote, String> colProducto;
-
-    @FXML
-    private TableColumn<Lote, String> colProveedor;
-
-    @FXML
-    private TableColumn<Lote, Integer> colCantidad;
-
-    @FXML
-    private TableColumn<Lote, BigDecimal> colCostoUnitario;
-
-    @FXML
-    private TableColumn<Lote, LocalDate> colFechaIngreso;
-
-    @FXML
-    private ComboBox<Producto> comboProducto;
-
-    @FXML
-    private ComboBox<Proveedor> comboProveedor;
-
-    @FXML
-    private TextField txtCantidad;
-
-    @FXML
-    private TextField txtCostoUnitario;
-
-    @FXML
-    private DatePicker dateFechaIngreso;
-
-    @FXML
-    private TextField txtFacturaReferencia;
+    @FXML private TableView<Lote> loteTable;
+    @FXML private TableColumn<Lote, String> colProducto;
+    @FXML private TableColumn<Lote, String> colProveedor;
+    @FXML private TableColumn<Lote, Integer> colCantidad;
+    @FXML private TableColumn<Lote, BigDecimal> colCostoUnitario;
+    @FXML private TableColumn<Lote, LocalDate> colFechaIngreso;
+    @FXML private ComboBox<Producto> comboProducto;
+    @FXML private ComboBox<Proveedor> comboProveedor;
+    @FXML private TextField txtCantidad;
+    @FXML private TextField txtCostoUnitario;
+    @FXML private DatePicker dateFechaIngreso;
+    @FXML private TextField txtFacturaReferencia;
 
     private ObservableList<Lote> lotes;
     private ObservableList<Producto> productos;
@@ -64,8 +41,7 @@ public class LoteController {
     private final ProveedorDAO proveedorDAO = new ProveedorDAO();
     private final LoteCompraService loteCompraService = new LoteCompraService();
 
-    @FXML
-    public void initialize() {
+    @FXML public void initialize() {
         lotes = FXCollections.observableArrayList();
         productos = FXCollections.observableArrayList();
         proveedores = FXCollections.observableArrayList();
@@ -82,8 +58,7 @@ public class LoteController {
         cargarDatosIniciales();
     }
 
-    @FXML
-    public void onGuardar() {
+    @FXML public void onGuardar() {
         try {
             Producto producto = comboProducto.getValue();
             Proveedor proveedor = comboProveedor.getValue();
@@ -192,13 +167,11 @@ public class LoteController {
         return exception.getMessage();
     }
 
-    @FXML
-    public void onCancelar() {
+    @FXML public void onCancelar() {
         limpiarFormulario();
     }
 
-    @FXML
-    public void onTableClick(MouseEvent event) {
+    @FXML public void onTableClick(MouseEvent event) {
         if (event.getClickCount() == 2) {
             Lote selectedLote = loteTable.getSelectionModel().getSelectedItem();
             if (selectedLote != null) {

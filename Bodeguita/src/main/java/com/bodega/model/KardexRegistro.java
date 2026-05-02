@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 /** Fila lista para mostrar el Kardex valorado de un producto. */
 public class KardexRegistro {
-
     private LocalDate fecha;
     private String tipo;
     private BigDecimal cantidad;
@@ -40,83 +39,24 @@ public class KardexRegistro {
         this.observacion = observacion;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public BigDecimal getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(BigDecimal cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public BigDecimal getCostoUnitario() {
-        return costoUnitario;
-    }
-
-    public void setCostoUnitario(BigDecimal costoUnitario) {
-        this.costoUnitario = costoUnitario;
-    }
-
-    public BigDecimal getValorMovimiento() {
-        return valorMovimiento;
-    }
-
-    public void setValorMovimiento(BigDecimal valorMovimiento) {
-        this.valorMovimiento = valorMovimiento;
-    }
-
-    public BigDecimal getSaldoCantidad() {
-        return saldoCantidad;
-    }
-
-    public void setSaldoCantidad(BigDecimal saldoCantidad) {
-        this.saldoCantidad = saldoCantidad;
-    }
-
-    public BigDecimal getSaldoValor() {
-        return saldoValor;
-    }
-
-    public void setSaldoValor(BigDecimal saldoValor) {
-        this.saldoValor = saldoValor;
-    }
-
-    public String getReferencia() {
-        return referencia;
-    }
-
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
-
-    public String getLote() {
-        return lote;
-    }
-
-    public void setLote(String lote) {
-        this.lote = lote;
-    }
-
-    public String getObservacion() {
-        return observacion;
-    }
-
-    public void setObservacion(String observacion) {
-        this.observacion = observacion;
-    }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+    public BigDecimal getCantidad() { return cantidad; }
+    public void setCantidad(BigDecimal cantidad) { this.cantidad = cantidad; }
+    public BigDecimal getCostoUnitario() { return costoUnitario; }
+    public void setCostoUnitario(BigDecimal costoUnitario) { this.costoUnitario = costoUnitario; }
+    public BigDecimal getValorMovimiento() { return valorMovimiento; }
+    public void setValorMovimiento(BigDecimal valorMovimiento) { this.valorMovimiento = valorMovimiento; }
+    public BigDecimal getSaldoCantidad() { return saldoCantidad; }
+    public void setSaldoCantidad(BigDecimal saldoCantidad) { this.saldoCantidad = saldoCantidad; }
+    public BigDecimal getSaldoValor() { return saldoValor; }
+    public void setSaldoValor(BigDecimal saldoValor) { this.saldoValor = saldoValor; }
+    public String getReferencia() { return referencia; }
+    public void setReferencia(String referencia) { this.referencia = referencia; }
+    public String getLote() { return lote; }
+    public void setLote(String lote) { this.lote = lote; }
+    public String getObservacion() { return observacion; }
+    public void setObservacion(String observacion) { this.observacion = observacion; }
 }

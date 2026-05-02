@@ -12,7 +12,7 @@
             </padding>
             <children>
                 <Label styleClass="screen-title" text="Productos" />
-                <Label styleClass="screen-subtitle" text="Catalogo, stock minimo y busqueda por nombre o codigo" />
+                <Label styleClass="screen-subtitle" text="Catalogo, stock minimo y busqueda por nombre" />
             </children>
         </VBox>
     </top>
@@ -22,7 +22,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <TextField fx:id="buscadorField" onAction="#buscarProducto" prefWidth="320.0" promptText="Buscar por nombre, SKU o codigo" />
+                        <TextField fx:id="buscadorField" onAction="#buscarProducto" prefWidth="320.0" promptText="Buscar por nombre..." />
                         <Button onAction="#buscarProducto" styleClass="primary-button" text="Buscar" />
                     </children>
                 </HBox>

@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS lote (
   cantidad_disponible DECIMAL(12,3) NOT NULL,
   costo_unitario DECIMAL(10,2) NOT NULL,
   fecha_ingreso DATE NOT NULL,
-  fecha_vencimiento DATE NULL,
   factura_referencia VARCHAR(80) NULL,
   activo BOOLEAN NOT NULL DEFAULT TRUE,
   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

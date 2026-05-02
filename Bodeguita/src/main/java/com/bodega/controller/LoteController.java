@@ -54,9 +54,6 @@ public class LoteController {
     private DatePicker dateFechaIngreso;
 
     @FXML
-    private DatePicker dateFechaVencimiento;
-
-    @FXML
     private TextField txtFacturaReferencia;
 
     private ObservableList<Lote> lotes;
@@ -93,7 +90,6 @@ public class LoteController {
             BigDecimal cantidad = parseBigDecimal(txtCantidad.getText(), "cantidad");
             BigDecimal costoUnitario = parseBigDecimal(txtCostoUnitario.getText(), "costo unitario");
             LocalDate fechaIngreso = dateFechaIngreso.getValue();
-            LocalDate fechaVencimiento = dateFechaVencimiento.getValue();
             String facturaReferencia = ValidationUtils.opcional(txtFacturaReferencia.getText());
 
             if (producto == null) {
@@ -106,9 +102,6 @@ public class LoteController {
             ValidationUtils.requeridoPositivo(costoUnitario, "costo unitario");
             if (fechaIngreso == null) {
                 throw new IllegalArgumentException("La fecha de ingreso es obligatoria.");
-            }
-            if (fechaVencimiento != null && fechaVencimiento.isBefore(fechaIngreso)) {
-                throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de ingreso.");
             }
             validarNombreProducto(producto);
             validarProveedor(proveedor);
@@ -125,7 +118,6 @@ public class LoteController {
                 cantidadDisponible,
                 costoUnitario,
                 fechaIngreso,
-                fechaVencimiento,
                 facturaReferencia,
                 true
             );
@@ -170,7 +162,6 @@ public class LoteController {
         txtCantidad.clear();
         txtCostoUnitario.clear();
         dateFechaIngreso.setValue(null);
-        dateFechaVencimiento.setValue(null);
         txtFacturaReferencia.clear();
     }
 
@@ -222,7 +213,6 @@ public class LoteController {
         txtCantidad.setText(String.valueOf(lote.getCantidad()));
         txtCostoUnitario.setText(String.valueOf(lote.getCostoUnitario()));
         dateFechaIngreso.setValue(lote.getFechaIngreso());
-        dateFechaVencimiento.setValue(lote.getFechaVencimiento());
         txtFacturaReferencia.setText(lote.getFacturaReferencia());
     }
 }

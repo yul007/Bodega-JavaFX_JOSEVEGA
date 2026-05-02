@@ -14,7 +14,6 @@ public class Lote {
     private BigDecimal cantidadDisponible;
     private BigDecimal costoUnitario;
     private LocalDate fechaIngreso;
-    private LocalDate fechaVencimiento;
     private String facturaReferencia;
     private boolean activo;
 
@@ -27,7 +26,7 @@ public class Lote {
 
     public Lote(int idLote, Producto producto, Proveedor proveedor, String codigoLote,
             BigDecimal cantidad, BigDecimal cantidadDisponible, BigDecimal costoUnitario,
-            LocalDate fechaIngreso, LocalDate fechaVencimiento, String facturaReferencia,
+            LocalDate fechaIngreso, String facturaReferencia,
             boolean activo) {
         this.idLote = idLote;
         this.producto = producto;
@@ -37,7 +36,6 @@ public class Lote {
         this.cantidadDisponible = cantidadDisponible;
         this.costoUnitario = costoUnitario;
         this.fechaIngreso = fechaIngreso;
-        this.fechaVencimiento = fechaVencimiento;
         this.facturaReferencia = facturaReferencia;
         this.activo = activo;
     }
@@ -104,14 +102,6 @@ public class Lote {
 
     public void setFechaIngreso(LocalDate fechaIngreso) {
         this.fechaIngreso = fechaIngreso;
-    }
-
-    public LocalDate getFechaVencimiento() {
-        return fechaVencimiento;
-    }
-
-    public void setFechaVencimiento(LocalDate fechaVencimiento) {
-        this.fechaVencimiento = fechaVencimiento;
     }
 
     public String getFacturaReferencia() {

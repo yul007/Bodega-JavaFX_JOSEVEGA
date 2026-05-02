@@ -12,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,7 @@ public class LoteDAO {
 
     private static final String SELECT_LOTE_RELACIONADO = """
             SELECT l.id_lote, l.codigo_lote, l.cantidad, l.cantidad_disponible,
-                   l.costo_unitario, l.fecha_ingreso, l.fecha_vencimiento,
+                   l.costo_unitario, l.fecha_ingreso,
                    l.factura_referencia, l.activo,
                    p.id_producto, p.id_categoria, p.sku, p.codigo_barras, p.nombre AS producto_nombre,
                    p.descripcion AS producto_descripcion, p.stock_minimo,
@@ -56,9 +55,9 @@ public class LoteDAO {
         String sql = """
                 INSERT INTO lote (
                   id_producto, id_proveedor, codigo_lote, cantidad, cantidad_disponible,
-                  costo_unitario, fecha_ingreso, fecha_vencimiento, factura_referencia, activo
+                  costo_unitario, fecha_ingreso, factura_referencia, activo
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -150,7 +149,7 @@ public class LoteDAO {
                 UPDATE lote
                 SET id_producto = ?, id_proveedor = ?, codigo_lote = ?, cantidad = ?,
                     cantidad_disponible = ?, costo_unitario = ?, fecha_ingreso = ?,
-                    fecha_vencimiento = ?, factura_referencia = ?, activo = ?
+                    factura_referencia = ?, activo = ?
                 WHERE id_lote = ?
                 """;
 
@@ -191,9 +190,8 @@ public class LoteDAO {
         statement.setBigDecimal(5, lote.getCantidadDisponible());
         statement.setBigDecimal(6, lote.getCostoUnitario());
         statement.setDate(7, Date.valueOf(lote.getFechaIngreso()));
-        statement.setDate(8, toDate(lote.getFechaVencimiento()));
-        statement.setString(9, lote.getFacturaReferencia());
-        statement.setBoolean(10, lote.isActivo());
+        statement.setString(8, lote.getFacturaReferencia());
+        statement.setBoolean(9, lote.isActivo());
     }
 
     private void validarLote(Lote lote) {
@@ -212,9 +210,6 @@ public class LoteDAO {
         ValidationUtils.requeridoPositivo(lote.getCostoUnitario(), "costo unitario");
         if (lote.getFechaIngreso() == null) {
             throw new IllegalArgumentException("La fecha de ingreso es obligatoria.");
-        }
-        if (lote.getFechaVencimiento() != null && lote.getFechaVencimiento().isBefore(lote.getFechaIngreso())) {
-            throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de ingreso.");
         }
     }
 
@@ -268,17 +263,8 @@ public class LoteDAO {
                 resultSet.getBigDecimal("cantidad_disponible"),
                 resultSet.getBigDecimal("costo_unitario"),
                 resultSet.getDate("fecha_ingreso").toLocalDate(),
-                toLocalDate(resultSet.getDate("fecha_vencimiento")),
                 resultSet.getString("factura_referencia"),
                 resultSet.getBoolean("activo"));
-    }
-
-    private Date toDate(LocalDate localDate) {
-        return localDate == null ? null : Date.valueOf(localDate);
-    }
-
-    private LocalDate toLocalDate(Date date) {
-        return date == null ? null : date.toLocalDate();
     }
 
     private int leerIdGenerado(PreparedStatement statement) throws SQLException {

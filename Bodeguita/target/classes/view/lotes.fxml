@@ -75,12 +75,6 @@
                         </HBox>
                         <HBox spacing="10" alignment="CENTER">
                             <children>
-                                <Label text="Fecha Vencimiento (Opcional):" />
-                                <DatePicker fx:id="dateFechaVencimiento" />
-                            </children>
-                        </HBox>
-                        <HBox spacing="10" alignment="CENTER">
-                            <children>
                                 <Label text="Factura Referencia:" />
                                 <TextField fx:id="txtFacturaReferencia" />
                             </children>

@@ -5,13 +5,8 @@ import com.bodega.dao.ProductoDAO;
 import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
 import com.bodega.service.QrCodeService;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,19 +14,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*; // Esto ya incluye Button, TextField, TableView y el Label correcto
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 /** Controlador de productos: busqueda, CRUD y alertas visuales de stock. */
 public class ProductoController {
@@ -163,10 +159,10 @@ public class ProductoController {
     private void mostrarQrSeleccionado() {
         Producto seleccionado = obtenerSeleccionado();
         if (seleccionado == null) {
-            qrImageView.setImage(null);
+            Platform.runLater(() -> qrImageView.setImage(null));
             return;
         }
-        qrCodeService.generarQRCode(seleccionado, qrImageView);
+        generarQrEnBackground(seleccionado);
     }
 
     private void configurarTabla() {
@@ -202,12 +198,48 @@ public class ProductoController {
     private void configurarSeleccionQr() {
         productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> {
             if (actual == null) {
-                qrImageView.setImage(null);
-                return;
+                Platform.runLater(() -> qrImageView.setImage(null));
+            } else {
+                generarQrEnBackground(actual);
             }
-            qrCodeService.generarQRCode(actual, qrImageView);
         });
     }
+
+    // private void generarQrEnBackground(Producto producto) {
+    //     // Ejecutar la generación del QR en un hilo separado para no bloquear la UI
+    //     Thread qrThread = new Thread(() -> {
+    //         try {
+    //             javafx.scene.image.Image qrImage = qrCodeService.generarQRCode(producto);
+
+    //             Platform.runLater(() -> qrImageView.setImage(qrImage));
+    //         } catch (Exception e) {
+    //             Platform.runLater(() -> {
+    //                 qrImageView.setImage(null);
+    //                 mostrarError("Error QR", "No se pudo generar el código QR: " + e.getMessage());
+    //             });
+    //         }
+    //     });
+    //     qrThread.setDaemon(true);
+    //     qrThread.start();
+    // }
+
+    private void generarQrEnBackground(Producto producto) {
+    // Ejecutar la generación del QR en un hilo separado para no bloquear la UI
+    Thread qrThread = new Thread(() -> {
+        try {
+            // Pasamos tanto el producto como el qrImageView al servicio
+            qrCodeService.generarQRCode(producto, qrImageView);
+            
+        } catch (Exception e) {
+            Platform.runLater(() -> {
+                qrImageView.setImage(null);
+                mostrarError("Error QR", "No se pudo generar el código QR: " + e.getMessage());
+            });
+        }
+    });
+    qrThread.setDaemon(true);
+    qrThread.start();
+}
 
     private void cargarProductos() {
         try {

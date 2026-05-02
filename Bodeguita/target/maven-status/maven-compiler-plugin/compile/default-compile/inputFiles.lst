@@ -2,6 +2,7 @@
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/CategoriaController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/ClienteController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/DashboardController.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/KardexController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/LoginController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/LoteController.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/MenuController.java
@@ -40,4 +41,5 @@
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/ReporteService.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/service/package-info.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/util/MusicPlayer.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/util/ValidationUtils.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/util/package-info.java

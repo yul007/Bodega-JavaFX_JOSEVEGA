@@ -4,12 +4,11 @@ import com.bodega.model.Producto;
 import com.bodega.model.Cliente;
 import com.bodega.model.DetalleSalida;
 import com.bodega.model.NotaSalida;
-import com.bodega.model.ResultadoFIFO;
-import com.bodega.service.FIFOInventoryService;
+import com.bodega.service.NotaSalidaService;
 import com.bodega.dao.ProductoDAO;
 import com.bodega.dao.ClienteDAO;
 import com.bodega.dao.NotaSalidaDAO;
-import com.bodega.db.DatabaseConnection;
+import com.bodega.util.ValidationUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,7 +18,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SalidaController {
@@ -73,14 +71,14 @@ public class SalidaController {
     private ProductoDAO productoDAO;
     private ClienteDAO clienteDAO;
     private NotaSalidaDAO notaSalidaDAO;
-    private FIFOInventoryService fifoService;
+    private NotaSalidaService notaSalidaService;
 
     @FXML
     public void initialize() {
         productoDAO = new ProductoDAO();
         clienteDAO = new ClienteDAO();
         notaSalidaDAO = new NotaSalidaDAO();
-        fifoService = new FIFOInventoryService();
+        notaSalidaService = new NotaSalidaService();
         
         detalles = FXCollections.observableArrayList();
         productos = FXCollections.observableArrayList();
@@ -107,7 +105,11 @@ public class SalidaController {
             productos.setAll(productoDAO.listarActivos());
             comboProducto.setItems(productos);
         } catch (SQLException e) {
-            mostrarMensaje("Error al cargar productos: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            mostrarMensaje("No se pudieron cargar los productos.\n" + mensajeAmigableBD(e),
+                    "Error", Alert.AlertType.ERROR);
+        } catch (RuntimeException e) {
+            mostrarMensaje("No se pudieron cargar los productos.\n" + e.getMessage(),
+                    "Error", Alert.AlertType.ERROR);
         }
     }
     
@@ -116,7 +118,11 @@ public class SalidaController {
             clientes.setAll(clienteDAO.listarActivos());
             comboCliente.setItems(clientes);
         } catch (SQLException e) {
-            mostrarMensaje("Error al cargar clientes: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
+            mostrarMensaje("No se pudieron cargar los clientes.\n" + mensajeAmigableBD(e),
+                    "Error", Alert.AlertType.ERROR);
+        } catch (RuntimeException e) {
+            mostrarMensaje("No se pudieron cargar los clientes.\n" + e.getMessage(),
+                    "Error", Alert.AlertType.ERROR);
         }
     }
 
@@ -124,18 +130,19 @@ public class SalidaController {
     public void onAgregarDetalle() {
         try {
             Producto producto = comboProducto.getValue();
-            BigDecimal cantidad = new BigDecimal(txtCantidad.getText());
-            BigDecimal precioUnitario = new BigDecimal(txtPrecioUnitario.getText());
+            BigDecimal cantidad = parsePositive(txtCantidad.getText(), "cantidad");
+            BigDecimal precioUnitario = parsePositive(txtPrecioUnitario.getText(), "precio unitario");
             BigDecimal subtotal = precioUnitario.multiply(cantidad).setScale(2, RoundingMode.HALF_UP);
 
-            if (producto == null || cantidad.compareTo(BigDecimal.ZERO) <= 0 || 
-                precioUnitario.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Todos los campos deben completarse con valores válidos.");
+            if (producto == null) {
+                throw new IllegalArgumentException("Debe seleccionar un producto.");
             }
-            
+            ValidationUtils.requeridoPositivo(cantidad, "cantidad");
+            ValidationUtils.requeridoPositivo(precioUnitario, "precio unitario");
+
             if (producto.getStockActual().compareTo(cantidad) < 0) {
-                throw new IllegalArgumentException("Stock insuficiente. Stock actual: " + 
-                    producto.getStockActual() + ", solicitado: " + cantidad);
+                throw new IllegalArgumentException("Stock insuficiente. Stock actual: "
+                        + producto.getStockActual() + ", solicitado: " + cantidad);
             }
 
             DetalleSalida detalle = new DetalleSalida();
@@ -148,11 +155,11 @@ public class SalidaController {
 
             limpiarFormularioDetalle();
             actualizarTotales();
-
-        } catch (NumberFormatException e) {
-            mostrarMensaje("Cantidad y precio unitario deben ser valores numéricos válidos.", "Error", Alert.AlertType.ERROR);
         } catch (IllegalArgumentException e) {
             mostrarMensaje(e.getMessage(), "Error", Alert.AlertType.ERROR);
+        } catch (RuntimeException e) {
+            mostrarMensaje("No se pudo agregar el detalle.\n" + e.getMessage(),
+                    "Error", Alert.AlertType.ERROR);
         }
     }
     
@@ -170,14 +177,22 @@ public class SalidaController {
 
     @FXML
     public void onGenerarFactura() {
-        Connection connection = null;
         try {
             Cliente cliente = comboCliente.getValue();
             LocalDate fecha = dateFecha.getValue();
-            String numeroFactura = txtNumeroFactura.getText();
+            String numeroFactura = ValidationUtils.requerido(txtNumeroFactura.getText(), "numero de factura");
 
-            if (cliente == null || fecha == null || numeroFactura.trim().isEmpty() || detalles.isEmpty()) {
-                throw new IllegalArgumentException("Todos los campos obligatorios deben completarse correctamente.");
+            if (cliente == null) {
+                throw new IllegalArgumentException("Debe seleccionar un cliente antes de generar la factura.");
+            }
+            if (fecha == null) {
+                throw new IllegalArgumentException("La fecha de la venta es obligatoria.");
+            }
+            if (detalles.isEmpty()) {
+                throw new IllegalArgumentException("Debe agregar al menos un detalle antes de generar la factura.");
+            }
+            if (notaSalidaDAO.buscarPorNumeroFactura(numeroFactura).isPresent()) {
+                throw new IllegalArgumentException("Ya existe una factura con ese numero.");
             }
             
             // Obtener el texto de los labels correctamente
@@ -188,85 +203,37 @@ public class SalidaController {
             BigDecimal subtotal = new BigDecimal(subtotalText);
             BigDecimal iva = new BigDecimal(ivaText);
             BigDecimal total = new BigDecimal(totalText);
-            
-            // Aplicar FIFO para cada detalle y calcular costos
-            BigDecimal costoTotalGeneral = BigDecimal.ZERO;
-            BigDecimal utilidadTotal = BigDecimal.ZERO;
-            
-            for (DetalleSalida detalle : detalles) {
-                ResultadoFIFO resultado = fifoService.aplicarSalidaFIFO(
-                    detalle.getProducto().getIdProducto(), 
-                    detalle.getCantidad()
-                );
-                
-                detalle.setCostoTotalFifo(resultado.getCostoTotal());
-                detalle.setCostoUnitarioFifo(
-                    resultado.getCostoTotal().divide(detalle.getCantidad(), 2, RoundingMode.HALF_UP)
-                );
-                detalle.setUtilidad(
-                    detalle.getSubtotal().subtract(resultado.getCostoTotal())
-                );
-                
-                costoTotalGeneral = costoTotalGeneral.add(resultado.getCostoTotal());
-                utilidadTotal = utilidadTotal.add(detalle.getUtilidad());
-                detalle.getProducto().setStockActual(resultado.getStockNuevo());
-            }
-            
-            // Crear la nota de salida (sin ID aún)
+
             NotaSalida nuevaNotaSalida = new NotaSalida(
-                0,                          // idSalida temporal
+                0,
                 cliente,
                 numeroFactura,
                 fecha,
                 subtotal,
                 iva,
                 total,
-                costoTotalGeneral,
-                utilidadTotal,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
                 "completada",
                 ""
             );
-            
-            // Obtener una conexión manual para manejar la transacción
-            connection = DatabaseConnection.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            
-            // Guardar la cabecera de la nota
-            int idSalida = notaSalidaDAO.crear(connection, nuevaNotaSalida);
-            nuevaNotaSalida.setIdSalida(idSalida);
-            
-            // Guardar cada detalle usando la misma conexión
-            for (DetalleSalida detalle : detalles) {
-                detalle.setNotaSalida(nuevaNotaSalida);
-                notaSalidaDAO.crearDetalle(connection, detalle);
-            }
-            
-            // Confirmar la transacción
-            connection.commit();
-            
+
+            NotaSalida notaGuardada = notaSalidaService.crearNotaSalida(nuevaNotaSalida, detalles);
+
             limpiarFormularioCabecera();
             detalles.clear();
             actualizarTotales();
 
-            mostrarMensaje("Factura generada exitosamente.\nNúmero: " + numeroFactura, 
+            mostrarMensaje("Factura generada exitosamente.\nNúmero: " + notaGuardada.getNumeroFactura(), 
                 "Éxito", Alert.AlertType.INFORMATION);
 
         } catch (IllegalArgumentException e) {
             mostrarMensaje(e.getMessage(), "Error", Alert.AlertType.ERROR);
-            if (connection != null) try { connection.rollback(); } catch (SQLException ignored) {}
         } catch (SQLException e) {
-            mostrarMensaje("Error al guardar la factura: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
-            if (connection != null) try { connection.rollback(); } catch (SQLException ignored) {}
+            mostrarMensaje("No se pudo guardar la factura.\n" + mensajeAmigableBD(e),
+                    "Error", Alert.AlertType.ERROR);
         } catch (Exception e) {
-            mostrarMensaje("Error al procesar inventario FIFO: " + e.getMessage(), "Error", Alert.AlertType.ERROR);
-            if (connection != null) try { connection.rollback(); } catch (SQLException ignored) {}
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                    connection.close();
-                } catch (SQLException ignored) {}
-            }
+            mostrarMensaje("No se pudo procesar la venta.\n" + e.getMessage(), "Error", Alert.AlertType.ERROR);
         }
     }
 
@@ -301,6 +268,22 @@ public class SalidaController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private String mensajeAmigableBD(SQLException exception) {
+        String causa = exception.getMessage() == null ? "" : exception.getMessage().toLowerCase();
+        if (causa.contains("connect") || causa.contains("timeout") || causa.contains("communications link failure")) {
+            return "No hay conexion con MySQL. Verifica que el servidor este encendido y accesible.";
+        }
+        return exception.getMessage();
+    }
+
+    private BigDecimal parsePositive(String texto, String campo) {
+        try {
+            return ValidationUtils.requeridoPositivo(new BigDecimal(texto.trim().replace(",", ".")), campo);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El campo " + campo + " debe ser numerico.");
+        }
     }
 
     @FXML

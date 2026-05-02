@@ -202,6 +202,35 @@ public class KardexDAO {
         return BigDecimal.ZERO;
     }
 
+    public List<Object[]> listarResumenInventarioActual() throws SQLException {
+        String sql = """
+                SELECT p.nombre AS producto_nombre,
+                       COALESCE(SUM(l.cantidad_disponible), 0) AS cantidad_total,
+                       COALESCE(SUM(l.cantidad_disponible * l.costo_unitario), 0) AS valor_total
+                FROM producto p
+                LEFT JOIN lote l ON l.id_producto = p.id_producto
+                                  AND l.activo = TRUE
+                                  AND l.cantidad_disponible > 0
+                WHERE p.activo = TRUE
+                GROUP BY p.id_producto, p.nombre
+                ORDER BY p.nombre
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()) {
+            List<Object[]> filas = new ArrayList<>();
+            while (resultSet.next()) {
+                filas.add(new Object[] {
+                        resultSet.getString("producto_nombre"),
+                        resultSet.getBigDecimal("cantidad_total"),
+                        resultSet.getBigDecimal("valor_total")
+                });
+            }
+            return filas;
+        }
+    }
+
     private List<MovimientoKardex> mapearLista(ResultSet resultSet) throws SQLException {
         List<MovimientoKardex> movimientos = new ArrayList<>();
         while (resultSet.next()) {

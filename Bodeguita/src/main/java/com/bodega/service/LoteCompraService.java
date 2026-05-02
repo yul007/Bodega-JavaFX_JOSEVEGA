@@ -107,7 +107,7 @@ public class LoteCompraService {
                 saldoValor,
                 "Entrada de mercancia por compra");
 
-        int idMovimiento = kardexDAO.crear(connection, entrada);
+        int idMovimiento = registrarMovimientoKardexEntrada(connection, entrada);
         entrada.setIdMovimiento(idMovimiento);
 
         return lote;
@@ -161,6 +161,11 @@ public class LoteCompraService {
 
     private BigDecimal valorSeguro(BigDecimal valor) {
         return valor == null ? BigDecimal.ZERO : valor;
+    }
+
+    private int registrarMovimientoKardexEntrada(Connection connection, MovimientoKardex movimiento)
+            throws SQLException {
+        return kardexDAO.crear(connection, movimiento);
     }
 
     private void rollback(Connection connection) {

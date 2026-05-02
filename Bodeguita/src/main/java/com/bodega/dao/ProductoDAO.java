@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.bodega.util.ValidationUtils;
 
 /** DAO para productos, busquedas por codigo/nombre y consultas de stock. */
 public class ProductoDAO {
@@ -33,6 +34,7 @@ public class ProductoDAO {
     }
 
     public int crear(Producto producto) throws SQLException {
+        validarProducto(producto);
         String sql = """
                 INSERT INTO producto (
                   id_categoria, sku, codigo_barras, nombre, descripcion, unidad_medida,
@@ -143,6 +145,7 @@ public class ProductoDAO {
     }
 
     public boolean actualizar(Producto producto) throws SQLException {
+        validarProducto(producto);
         String sql = """
                 UPDATE producto
                 SET id_categoria = ?, sku = ?, codigo_barras = ?, nombre = ?, descripcion = ?,
@@ -159,6 +162,9 @@ public class ProductoDAO {
     }
 
     public boolean actualizarStock(Connection connection, int idProducto, BigDecimal nuevoStock) throws SQLException {
+        if (nuevoStock == null || nuevoStock.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo.");
+        }
         String sql = "UPDATE producto SET stock_actual = ? WHERE id_producto = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -189,6 +195,21 @@ public class ProductoDAO {
         statement.setBigDecimal(8, producto.getStockActual());
         statement.setBigDecimal(9, producto.getPrecioVenta());
         statement.setBoolean(10, producto.isActivo());
+    }
+
+    private void validarProducto(Producto producto) {
+        if (producto == null) {
+            throw new IllegalArgumentException("El producto es obligatorio.");
+        }
+        ValidationUtils.requerido(producto.getSku(), "SKU");
+        ValidationUtils.requerido(producto.getNombre(), "nombre");
+        ValidationUtils.requerido(producto.getUnidadMedida(), "unidad de medida");
+        ValidationUtils.requeridoNoNegativo(producto.getStockMinimo(), "stock minimo");
+        ValidationUtils.requeridoNoNegativo(producto.getStockActual(), "stock actual");
+        ValidationUtils.requeridoNoNegativo(producto.getPrecioVenta(), "precio venta");
+        if (producto.getCategoria() == null) {
+            throw new IllegalArgumentException("Debe seleccionar una categoria.");
+        }
     }
 
     private List<Producto> consultarLista(String sql) throws SQLException {

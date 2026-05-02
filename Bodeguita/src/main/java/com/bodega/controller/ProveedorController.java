@@ -2,6 +2,7 @@ package com.bodega.controller;
 
 import com.bodega.dao.ProveedorDAO;
 import com.bodega.model.Proveedor;
+import com.bodega.util.ValidationUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -100,20 +101,17 @@ public class ProveedorController {
 
         dialog.getDialogPane().setContent(grid);
 
-        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty()
-                .or(rucField.textProperty().isEmpty());
-        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
-
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 Proveedor proveedor = new Proveedor();
-                proveedor.setRuc(rucField.getText());
-                proveedor.setNombre(nombreField.getText());
-                proveedor.setContacto(contactoField.getText());
-                proveedor.setTelefono(telefonoField.getText());
-                proveedor.setEmail(emailField.getText());
-                proveedor.setDireccion(direccionField.getText());
+                proveedor.setRuc(ValidationUtils.requerido(rucField.getText(), "RUC"));
+                proveedor.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+                proveedor.setContacto(ValidationUtils.opcional(contactoField.getText()));
+                proveedor.setTelefono(ValidationUtils.opcional(telefonoField.getText()));
+                proveedor.setEmail(ValidationUtils.opcional(emailField.getText()));
+                proveedor.setDireccion(ValidationUtils.opcional(direccionField.getText()));
                 proveedor.setActivo(true);
+                validarProveedor(proveedor);
                 return proveedor;
             }
             return null;
@@ -180,18 +178,15 @@ public class ProveedorController {
 
         dialog.getDialogPane().setContent(grid);
 
-        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty()
-                .or(rucField.textProperty().isEmpty());
-        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
-
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
-                selected.setRuc(rucField.getText());
-                selected.setNombre(nombreField.getText());
-                selected.setContacto(contactoField.getText());
-                selected.setTelefono(telefonoField.getText());
-                selected.setEmail(emailField.getText());
-                selected.setDireccion(direccionField.getText());
+                selected.setRuc(ValidationUtils.requerido(rucField.getText(), "RUC"));
+                selected.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+                selected.setContacto(ValidationUtils.opcional(contactoField.getText()));
+                selected.setTelefono(ValidationUtils.opcional(telefonoField.getText()));
+                selected.setEmail(ValidationUtils.opcional(emailField.getText()));
+                selected.setDireccion(ValidationUtils.opcional(direccionField.getText()));
+                validarProveedor(selected);
                 return selected;
             }
             return null;
@@ -246,5 +241,10 @@ public class ProveedorController {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void validarProveedor(Proveedor proveedor) {
+        ValidationUtils.requerido(proveedor.getRuc(), "RUC");
+        ValidationUtils.requerido(proveedor.getNombre(), "nombre");
     }
 }

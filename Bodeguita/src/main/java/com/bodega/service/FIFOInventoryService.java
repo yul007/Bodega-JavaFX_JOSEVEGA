@@ -100,6 +100,9 @@ public class FIFOInventoryService {
         }
 
         BigDecimal stockNuevo = stockAnterior.subtract(cantidadSolicitada);
+        if (stockNuevo.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalStateException("La salida dejaria stock negativo para " + producto.getNombre() + ".");
+        }
         productoDAO.actualizarStock(connection, idProducto, stockNuevo);
 
         producto.setStockActual(stockNuevo);

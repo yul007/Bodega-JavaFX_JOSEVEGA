@@ -208,6 +208,57 @@ public class NotaSalidaDAO {
         }
     }
 
+    public List<Object[]> listarTopProductosVendidos(int limite) throws SQLException {
+        String sql = """
+                SELECT p.nombre AS producto_nombre, SUM(ds.cantidad) AS cantidad_total
+                FROM detalle_salida ds
+                JOIN producto p ON p.id_producto = ds.id_producto
+                GROUP BY p.id_producto, p.nombre
+                ORDER BY cantidad_total DESC, p.nombre
+                LIMIT ?
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, limite);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Object[]> filas = new ArrayList<>();
+                while (resultSet.next()) {
+                    filas.add(new Object[] {
+                            resultSet.getString("producto_nombre"),
+                            resultSet.getBigDecimal("cantidad_total")
+                    });
+                }
+                return filas;
+            }
+        }
+    }
+
+    public List<Object[]> listarVentasPorDiaUltimosDias(int dias) throws SQLException {
+        String sql = """
+                SELECT DATE(ns.fecha_emision) AS fecha_dia, COALESCE(SUM(ns.total), 0) AS total_dia
+                FROM nota_salida ns
+                WHERE ns.fecha_emision >= (CURDATE() - INTERVAL ? DAY)
+                GROUP BY DATE(ns.fecha_emision)
+                ORDER BY fecha_dia
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, dias);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Object[]> filas = new ArrayList<>();
+                while (resultSet.next()) {
+                    filas.add(new Object[] {
+                            resultSet.getDate("fecha_dia").toLocalDate(),
+                            resultSet.getBigDecimal("total_dia")
+                    });
+                }
+                return filas;
+            }
+        }
+    }
+
     private List<NotaSalida> consultarNotas(String sql) throws SQLException {
         try (Connection connection = databaseConnection.getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql);

@@ -21,6 +21,7 @@ com/bodega/dao/NotaSalidaDAO.class
 com/bodega/controller/ClienteController.class
 com/bodega/model/Proveedor.class
 com/bodega/service/ReporteService.class
+com/bodega/util/ValidationUtils.class
 com/bodega/dao/ProveedorDAO.class
 com/bodega/model/Lote.class
 com/bodega/controller/ProveedorController.class
@@ -39,6 +40,7 @@ com/bodega/db/package-info.class
 com/bodega/model/DetalleFIFO.class
 com/bodega/model/NotaSalida.class
 com/bodega/model/Categoria.class
+com/bodega/controller/KardexController.class
 com/bodega/controller/LoteController.class
 com/bodega/controller/package-info.class
 com/bodega/util/MusicPlayer.class

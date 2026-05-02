@@ -1,61 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ReporteController">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ReporteController">
     <top>
-        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #E0E0E0;">
+        <VBox spacing="4.0" styleClass="header-bar">
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10" />
+                <Insets top="18.0" right="28.0" bottom="18.0" left="28.0" />
             </padding>
-            <children>
-                <Label text="Gestión de Reportes" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-            </children>
-        </HBox>
+            <Label styleClass="screen-title" text="Gestión de Reportes" />
+            <Label styleClass="screen-subtitle" text="Exportación CSV y TXT según filtros y periodos" />
+        </VBox>
     </top>
 
     <center>
-        <VBox spacing="10" alignment="CENTER">
-            <padding>
-                <Insets top="10" bottom="10" />
-            </padding>
-            <children>
-                <!-- Selección del Reporte -->
-                <HBox spacing="10" alignment="CENTER">
-                    <children>
-                        <Label text="Tipo de Reporte:" />
-                        <ComboBox fx:id="comboTipoReporte" promptText="Seleccionar tipo de reporte" />
-                    </children>
-                </HBox>
+        <VBox spacing="16.0" styleClass="module-content">
+            <HBox spacing="12.0" styleClass="module-card">
+                <Label text="Tipo de reporte:" />
+                <ComboBox fx:id="comboTipoReporte" prefWidth="280.0" promptText="Seleccionar tipo de reporte" />
+            </HBox>
 
-                <!-- Filtros Adicionales -->
-                <HBox spacing="10" alignment="CENTER">
-                    <children>
-                        <Label text="Filtro Producto:" />
-                        <ComboBox fx:id="comboProducto" promptText="Seleccionar producto" />
+            <HBox spacing="12.0" styleClass="module-card">
+                <Label text="Producto:" />
+                <ComboBox fx:id="comboProducto" prefWidth="260.0" promptText="Seleccionar producto" />
+                <Label text="Proveedor:" />
+                <ComboBox fx:id="comboProveedor" prefWidth="260.0" promptText="Seleccionar proveedor" />
+                <Label text="Desde:" />
+                <DatePicker fx:id="dateDesde" />
+                <Label text="Hasta:" />
+                <DatePicker fx:id="dateHasta" />
+            </HBox>
 
-                        <Label text="Filtro Proveedor:" />
-                        <ComboBox fx:id="comboProveedor" promptText="Seleccionar proveedor" />
-
-                        <Label text="Fecha Desde:" />
-                        <DatePicker fx:id="dateDesde" />
-
-                        <Label text="Fecha Hasta:" />
-                        <DatePicker fx:id="dateHasta" />
-                    </children>
-                </HBox>
-
-                <!-- Botones de Exportación -->
-                <HBox spacing="20" alignment="CENTER">
-                    <padding>
-                        <Insets top="10" bottom="10" />
-                    </padding>
-                    <children>
-                        <Button fx:id="btnExportarCSV" text="Exportar CSV" onAction="#onExportarCSV" />
-                        <Button fx:id="btnExportarTXT" text="Exportar TXT" onAction="#onExportarTXT" />
-                    </children>
-                </HBox>
-            </children>
+            <HBox spacing="16.0" styleClass="module-card">
+                <Button fx:id="btnExportarCSV" onAction="#onExportarCSV" styleClass="primary-button" text="Exportar CSV" />
+                <Button fx:id="btnExportarTXT" onAction="#onExportarTXT" styleClass="secondary-button" text="Exportar TXT" />
+            </HBox>
         </VBox>
     </center>
 </BorderPane>

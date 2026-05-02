@@ -1,23 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21.0.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.KardexController">
     <top>
         <VBox spacing="4.0" styleClass="header-bar">
             <padding>
-                <Insets bottom="18.0" left="28.0" right="28.0" top="18.0" />
+                <Insets top="18.0" right="28.0" bottom="18.0" left="28.0" />
             </padding>
             <Label styleClass="screen-title" text="Kardex" />
             <Label styleClass="screen-subtitle" text="Historial valorado de entradas, salidas y saldos" />
         </VBox>
     </top>
     <center>
-        <VBox spacing="12.0" styleClass="module-content">
-            <Label styleClass="screen-subtitle" text="Modulo listo para conectar consulta de Kardex valorado." />
+        <VBox spacing="16.0" styleClass="module-content">
+            <HBox spacing="12.0" styleClass="module-card">
+                <Label text="Producto" />
+                <ComboBox fx:id="comboProducto" prefWidth="280.0" promptText="Seleccionar producto" />
+                <Label text="Desde" />
+                <DatePicker fx:id="dateDesde" />
+                <Label text="Hasta" />
+                <DatePicker fx:id="dateHasta" />
+                <Button onAction="#onFiltrar" styleClass="primary-button" text="Filtrar" />
+                <Button onAction="#onLimpiar" styleClass="secondary-button" text="Limpiar" />
+            </HBox>
+
+            <TableView fx:id="kardexTable" prefHeight="420.0">
+                <columns>
+                    <TableColumn fx:id="colFecha" prefWidth="110.0" text="Fecha" />
+                    <TableColumn fx:id="colTipo" prefWidth="90.0" text="Tipo" />
+                    <TableColumn fx:id="colCantidad" prefWidth="100.0" text="Cantidad" />
+                    <TableColumn fx:id="colCostoUnitario" prefWidth="120.0" text="Costo Unitario" />
+                    <TableColumn fx:id="colSaldoCantidad" prefWidth="120.0" text="Saldo Cantidad" />
+                    <TableColumn fx:id="colSaldoValor" prefWidth="130.0" text="Saldo Valor" />
+                    <TableColumn fx:id="colReferencia" prefWidth="180.0" text="Referencia" />
+                </columns>
+            </TableView>
+
+            <HBox spacing="12.0" styleClass="module-card">
+                <Label fx:id="lblResumenKardex" styleClass="screen-subtitle" text="Seleccione un producto para ver su Kardex." />
+                <Button onAction="#onExportarCSV" styleClass="primary-button" text="Exportar CSV" />
+                <Button onAction="#onExportarTXT" styleClass="secondary-button" text="Exportar TXT" />
+            </HBox>
         </VBox>
     </center>
 </BorderPane>

@@ -2,6 +2,7 @@ package com.bodega.controller;
 
 import com.bodega.dao.ClienteDAO;
 import com.bodega.model.Cliente;
+import com.bodega.util.ValidationUtils;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -191,11 +192,11 @@ public class ClienteController {
             }
 
             Cliente cliente = existente == null ? new Cliente() : existente;
-            cliente.setIdentificacion(identificacionField.getText().trim());
-            cliente.setNombre(nombreField.getText().trim());
-            cliente.setTelefono(normalizarOpcional(telefonoField.getText()));
-            cliente.setEmail(normalizarOpcional(emailField.getText()));
-            cliente.setDireccion(normalizarOpcional(direccionField.getText()));
+            cliente.setIdentificacion(ValidationUtils.requerido(identificacionField.getText(), "identificacion"));
+            cliente.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+            cliente.setTelefono(ValidationUtils.opcional(telefonoField.getText()));
+            cliente.setEmail(ValidationUtils.opcional(emailField.getText()));
+            cliente.setDireccion(ValidationUtils.opcional(direccionField.getText()));
             cliente.setActivo(true);
             validarCliente(cliente);
             return cliente;
@@ -218,27 +219,15 @@ public class ClienteController {
     }
 
     private void validarCliente(Cliente cliente) {
-        if (estaVacio(cliente.getIdentificacion())) {
-            throw new IllegalArgumentException("La identificacion es obligatoria.");
-        }
-        if (estaVacio(cliente.getNombre())) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
-        }
-        if (!estaVacio(cliente.getEmail()) && !cliente.getEmail().contains("@")) {
+        ValidationUtils.requerido(cliente.getIdentificacion(), "identificacion");
+        ValidationUtils.requerido(cliente.getNombre(), "nombre");
+        if (!ValidationUtils.estaVacio(cliente.getEmail()) && !cliente.getEmail().contains("@")) {
             throw new IllegalArgumentException("El email debe tener un formato basico valido.");
         }
     }
 
     private void actualizarResumen() {
         resumenLabel.setText("Clientes activos: " + clientes.size());
-    }
-
-    private String normalizarOpcional(String texto) {
-        return estaVacio(texto) ? null : texto.trim();
-    }
-
-    private boolean estaVacio(String texto) {
-        return texto == null || texto.trim().isEmpty();
     }
 
     private String valorSeguro(String texto) {

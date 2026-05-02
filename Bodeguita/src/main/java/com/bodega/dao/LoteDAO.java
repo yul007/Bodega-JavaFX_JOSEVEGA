@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.bodega.util.ValidationUtils;
 
 /** DAO para lotes de compra y consultas FIFO. */
 public class LoteDAO {
@@ -44,12 +45,14 @@ public class LoteDAO {
     }
 
     public int crear(Lote lote) throws SQLException {
+        validarLote(lote);
         try (Connection connection = databaseConnection.getConnection()) {
             return crear(connection, lote);
         }
     }
 
     public int crear(Connection connection, Lote lote) throws SQLException {
+        validarLote(lote);
         String sql = """
                 INSERT INTO lote (
                   id_producto, id_proveedor, codigo_lote, cantidad, cantidad_disponible,
@@ -102,6 +105,23 @@ public class LoteDAO {
         }
     }
 
+    public List<Lote> listarPorProveedor(int idProveedor) throws SQLException {
+        String sql = SELECT_LOTE_RELACIONADO
+                + " WHERE l.id_proveedor = ? ORDER BY l.fecha_ingreso DESC, l.id_lote DESC";
+
+        try (Connection connection = databaseConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idProveedor);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Lote> lotes = new ArrayList<>();
+                while (resultSet.next()) {
+                    lotes.add(mapearLote(resultSet));
+                }
+                return lotes;
+            }
+        }
+    }
+
     public List<Lote> listarDisponiblesFIFO(Connection connection, int idProducto) throws SQLException {
         String sql = SELECT_LOTE_RELACIONADO
                 + """
@@ -125,6 +145,7 @@ public class LoteDAO {
     }
 
     public boolean actualizar(Lote lote) throws SQLException {
+        validarLote(lote);
         String sql = """
                 UPDATE lote
                 SET id_producto = ?, id_proveedor = ?, codigo_lote = ?, cantidad = ?,
@@ -173,6 +194,28 @@ public class LoteDAO {
         statement.setDate(8, toDate(lote.getFechaVencimiento()));
         statement.setString(9, lote.getFacturaReferencia());
         statement.setBoolean(10, lote.isActivo());
+    }
+
+    private void validarLote(Lote lote) {
+        if (lote == null) {
+            throw new IllegalArgumentException("El lote es obligatorio.");
+        }
+        if (lote.getProducto() == null) {
+            throw new IllegalArgumentException("Debe seleccionar un producto.");
+        }
+        if (lote.getProveedor() == null) {
+            throw new IllegalArgumentException("Debe seleccionar un proveedor.");
+        }
+        ValidationUtils.requerido(lote.getCodigoLote(), "codigo de lote");
+        ValidationUtils.requeridoPositivo(lote.getCantidad(), "cantidad");
+        ValidationUtils.requeridoPositivo(lote.getCantidadDisponible(), "cantidad disponible");
+        ValidationUtils.requeridoPositivo(lote.getCostoUnitario(), "costo unitario");
+        if (lote.getFechaIngreso() == null) {
+            throw new IllegalArgumentException("La fecha de ingreso es obligatoria.");
+        }
+        if (lote.getFechaVencimiento() != null && lote.getFechaVencimiento().isBefore(lote.getFechaIngreso())) {
+            throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de ingreso.");
+        }
     }
 
     private List<Lote> consultarLista(String sql) throws SQLException {

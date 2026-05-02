@@ -45,6 +45,7 @@
                         <Button onAction="#inactivarProducto" styleClass="danger-button" text="Eliminar/Inactivar" />
                         <Button onAction="#verLotes" text="Ver Lotes" />
                         <Button onAction="#nuevaSalida" text="Nueva Salida" />
+                        <Button mnemonicParsing="false" onAction="#mostrarQrSeleccionado" text="Ver QR" />
                     </children>
                 </HBox>
 

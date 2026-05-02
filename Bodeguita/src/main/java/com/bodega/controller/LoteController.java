@@ -1,8 +1,13 @@
 package com.bodega.controller;
 
+import com.bodega.dao.LoteDAO;
+import com.bodega.dao.ProductoDAO;
+import com.bodega.dao.ProveedorDAO;
 import com.bodega.model.Lote;
 import com.bodega.model.Producto;
 import com.bodega.model.Proveedor;
+import com.bodega.service.LoteCompraService;
+import com.bodega.util.ValidationUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -57,12 +62,16 @@ public class LoteController {
     private ObservableList<Lote> lotes;
     private ObservableList<Producto> productos;
     private ObservableList<Proveedor> proveedores;
+    private final LoteDAO loteDAO = new LoteDAO();
+    private final ProductoDAO productoDAO = new ProductoDAO();
+    private final ProveedorDAO proveedorDAO = new ProveedorDAO();
+    private final LoteCompraService loteCompraService = new LoteCompraService();
 
     @FXML
     public void initialize() {
         lotes = FXCollections.observableArrayList();
-        productos = FXCollections.observableArrayList(); // Load from ProductoDAO
-        proveedores = FXCollections.observableArrayList(); // Load from ProveedorDAO
+        productos = FXCollections.observableArrayList();
+        proveedores = FXCollections.observableArrayList();
 
         colProducto.setCellValueFactory(new PropertyValueFactory<>("producto"));
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
@@ -73,6 +82,7 @@ public class LoteController {
         loteTable.setItems(lotes);
         comboProducto.setItems(productos);
         comboProveedor.setItems(proveedores);
+        cargarDatosIniciales();
     }
 
     @FXML
@@ -80,16 +90,28 @@ public class LoteController {
         try {
             Producto producto = comboProducto.getValue();
             Proveedor proveedor = comboProveedor.getValue();
-            BigDecimal cantidad = new BigDecimal(txtCantidad.getText());
-            BigDecimal costoUnitario = new BigDecimal(txtCostoUnitario.getText());
+            BigDecimal cantidad = parseBigDecimal(txtCantidad.getText(), "cantidad");
+            BigDecimal costoUnitario = parseBigDecimal(txtCostoUnitario.getText(), "costo unitario");
             LocalDate fechaIngreso = dateFechaIngreso.getValue();
             LocalDate fechaVencimiento = dateFechaVencimiento.getValue();
-            String facturaReferencia = txtFacturaReferencia.getText();
+            String facturaReferencia = ValidationUtils.opcional(txtFacturaReferencia.getText());
 
-            if (producto == null || proveedor == null || cantidad.compareTo(BigDecimal.ZERO) <= 0 || 
-                costoUnitario.compareTo(BigDecimal.ZERO) <= 0 || fechaIngreso == null) {
-                throw new IllegalArgumentException("Todos los campos obligatorios deben completarse correctamente.");
+            if (producto == null) {
+                throw new IllegalArgumentException("Debe seleccionar un producto.");
             }
+            if (proveedor == null) {
+                throw new IllegalArgumentException("Debe seleccionar un proveedor.");
+            }
+            ValidationUtils.requeridoPositivo(cantidad, "cantidad");
+            ValidationUtils.requeridoPositivo(costoUnitario, "costo unitario");
+            if (fechaIngreso == null) {
+                throw new IllegalArgumentException("La fecha de ingreso es obligatoria.");
+            }
+            if (fechaVencimiento != null && fechaVencimiento.isBefore(fechaIngreso)) {
+                throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la fecha de ingreso.");
+            }
+            validarNombreProducto(producto);
+            validarProveedor(proveedor);
 
             String codigoLote = "LOT-" + System.currentTimeMillis(); // Código temporal
             BigDecimal cantidadDisponible = cantidad;
@@ -108,26 +130,38 @@ public class LoteController {
                 true
             );
 
-            // Simulate saving to DB
-            lotes.add(nuevoLote);
-
-            // Update stock and Kardex
-            actualizarStockKardex(producto, cantidad, costoUnitario);
+            Lote loteGuardado = loteCompraService.registrarLoteCompra(nuevoLote);
+            lotes.add(0, loteGuardado);
 
             limpiarFormulario();
-            mostrarMensaje("Lote guardado exitosamente.", "Éxito", Alert.AlertType.INFORMATION);
-
-        } catch (NumberFormatException e) {
-            mostrarMensaje("Cantidad y costo unitario deben ser valores numéricos válidos.", "Error", Alert.AlertType.ERROR);
+            mostrarMensaje("Lote guardado exitosamente. Stock actualizado correctamente.", "Éxito", Alert.AlertType.INFORMATION);
         } catch (IllegalArgumentException e) {
             mostrarMensaje(e.getMessage(), "Error", Alert.AlertType.ERROR);
+        } catch (Exception e) {
+            mostrarMensaje("No se pudo guardar el lote.\n" + mensajeAmigable(e), "Error", Alert.AlertType.ERROR);
         }
     }
 
-    private void actualizarStockKardex(Producto producto, BigDecimal cantidad, BigDecimal costoUnitario) {
-        // Logic to update stock and register in Kardex
-        // Example: productoDAO.updateStock(producto, cantidad);
-        // kardexService.registrarEntrada(producto, cantidad, costoUnitario);
+    private BigDecimal parseBigDecimal(String texto, String campo) {
+        try {
+            BigDecimal valor = new BigDecimal(texto.trim().replace(",", "."));
+            if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("El campo " + campo + " debe ser mayor que cero.");
+            }
+            return valor;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El campo " + campo + " debe ser numerico.");
+        }
+    }
+
+    private void cargarDatosIniciales() {
+        try {
+            productos.setAll(productoDAO.listarActivos());
+            proveedores.setAll(proveedorDAO.listarActivos());
+            lotes.setAll(loteDAO.listarTodos());
+        } catch (Exception e) {
+            mostrarMensaje("No se pudieron cargar los datos iniciales.\n" + mensajeAmigable(e), "Error", Alert.AlertType.ERROR);
+        }
     }
 
     private void limpiarFormulario() {
@@ -145,6 +179,26 @@ public class LoteController {
         alert.setTitle(titulo);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void validarNombreProducto(Producto producto) {
+        if (producto == null || ValidationUtils.estaVacio(producto.getNombre())) {
+            throw new IllegalArgumentException("El producto debe tener un nombre valido.");
+        }
+    }
+
+    private void validarProveedor(Proveedor proveedor) {
+        if (proveedor == null || proveedor.getIdProveedor() <= 0) {
+            throw new IllegalArgumentException("Debe seleccionar un proveedor valido.");
+        }
+    }
+
+    private String mensajeAmigable(Exception exception) {
+        String mensaje = exception.getMessage() == null ? "" : exception.getMessage().toLowerCase();
+        if (mensaje.contains("connect") || mensaje.contains("timeout") || mensaje.contains("communications link failure")) {
+            return "No hay conexion con MySQL. Verifica el servidor y la configuracion.";
+        }
+        return exception.getMessage();
     }
 
     @FXML

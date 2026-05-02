@@ -3,6 +3,9 @@ package com.bodega.service;
 import com.bodega.model.Producto;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -18,25 +21,24 @@ public class QrCodeService {
         String contenido = producto.getSku();
         if (contenido == null || contenido.isBlank()) {
             contenido = String.valueOf(producto.getIdProducto());
-        } else {
-            contenido = producto.getIdProducto() + " | " + contenido;
         }
 
         String encoded = URLEncoder.encode(contenido, StandardCharsets.UTF_8);
         return QR_API_BASE_URL + encoded;
     }
 
-    public void generarQRCode(Producto producto, ImageView imageView) {
-        if (imageView == null) {
-            throw new IllegalArgumentException("El ImageView no puede ser nulo.");
-        }
 
+    public void generarQRCode(Producto producto, ImageView imageView) {
         try {
             String qrUrl = construirUrlQr(producto);
-            Image qrImage = new Image(qrUrl, true);
+            Image qrImage = new Image(qrUrl, 150, 150, true, true, true);
             imageView.setImage(qrImage);
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
         } catch (Exception exception) {
             imageView.setImage(null);
+            System.err.println("Error al cargar el QR: " + exception.getMessage());
         }
     }
+
 }

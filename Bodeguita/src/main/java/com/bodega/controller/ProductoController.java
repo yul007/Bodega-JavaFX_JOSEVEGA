@@ -5,20 +5,20 @@ import com.bodega.dao.ProductoDAO;
 import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
 import com.bodega.service.QrCodeService;
+import com.bodega.util.ValidationUtils;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*; // Esto ya incluye Button, TextField, TableView y el Label correcto
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.geometry.Insets;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,8 +26,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+// Estas son vitales para que tus columnas funcionen:
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.application.Platform;
 
 /** Controlador de productos: busqueda, CRUD y alertas visuales de stock. */
 public class ProductoController {
@@ -47,10 +49,9 @@ public class ProductoController {
     private TableView<Producto> productosTable;
 
     @FXML
-    private TableColumn<Producto, Number> idColumn;
+    private TableColumn<Producto, Integer> idColumn;
 
-    @FXML
-    private TableColumn<Producto, String> nombreColumn;
+    @FXML     private TableColumn<Producto, String> nombreColumn;
 
     @FXML
     private TableColumn<Producto, String> categoriaColumn;
@@ -155,15 +156,38 @@ public class ProductoController {
         }
     }
 
-    @FXML
-    private void mostrarQrSeleccionado() {
-        Producto seleccionado = obtenerSeleccionado();
-        if (seleccionado == null) {
-            Platform.runLater(() -> qrImageView.setImage(null));
-            return;
-        }
-        generarQrEnBackground(seleccionado);
+    // @FXML
+    // private void mostrarQrSeleccionado() {
+    //     Producto seleccionado = obtenerSeleccionado();
+    //     if (seleccionado == null) {
+    //         Platform.runLater(() -> qrImageView.setImage(null));
+    //         return;
+    //     }
+    //     generarQrEnBackground(seleccionado);
+    // }
+
+    //     @FXML
+    // private void mostrarQrSeleccionado() {
+    //     Producto seleccionado = obtenerSeleccionado();
+    //     if (seleccionado == null) {
+    //         qrImageView.setImage(null);
+    //         return;
+    //     }
+        
+    //     // Llamada directa sin hilos ni Platform.runLater
+    //     qrCodeService.generarQRCode(seleccionado, qrImageView);
+    // }
+
+@FXML
+private void mostrarQrSeleccionado() {
+    Producto seleccionado = obtenerSeleccionado();
+    if (seleccionado == null) {
+        qrImageView.setImage(null);
+        return;
     }
+    // Llamada directa al servicio que ya tienes
+    qrCodeService.generarQRCode(seleccionado, qrImageView);
+}
 
     private void configurarTabla() {
         idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto()));
@@ -198,53 +222,24 @@ public class ProductoController {
     private void configurarSeleccionQr() {
         productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> {
             if (actual == null) {
-                Platform.runLater(() -> qrImageView.setImage(null));
+                qrImageView.setImage(null);
             } else {
-                generarQrEnBackground(actual);
+                qrCodeService.generarQRCode(actual, qrImageView);
             }
         });
     }
 
-    // private void generarQrEnBackground(Producto producto) {
-    //     // Ejecutar la generación del QR en un hilo separado para no bloquear la UI
-    //     Thread qrThread = new Thread(() -> {
-    //         try {
-    //             javafx.scene.image.Image qrImage = qrCodeService.generarQRCode(producto);
-
-    //             Platform.runLater(() -> qrImageView.setImage(qrImage));
-    //         } catch (Exception e) {
-    //             Platform.runLater(() -> {
-    //                 qrImageView.setImage(null);
-    //                 mostrarError("Error QR", "No se pudo generar el código QR: " + e.getMessage());
-    //             });
-    //         }
-    //     });
-    //     qrThread.setDaemon(true);
-    //     qrThread.start();
-    // }
-
-    private void generarQrEnBackground(Producto producto) {
-    // Ejecutar la generación del QR en un hilo separado para no bloquear la UI
-    Thread qrThread = new Thread(() -> {
-        try {
-            // Pasamos tanto el producto como el qrImageView al servicio
-            qrCodeService.generarQRCode(producto, qrImageView);
-            
-        } catch (Exception e) {
-            Platform.runLater(() -> {
-                qrImageView.setImage(null);
-                mostrarError("Error QR", "No se pudo generar el código QR: " + e.getMessage());
-            });
-        }
-    });
-    qrThread.setDaemon(true);
-    qrThread.start();
-}
 
     private void cargarProductos() {
         try {
             productos.setAll(productoDAO.listarActivos());
             actualizarResumenStock();
+            if (!productos.isEmpty()) {
+                productosTable.getSelectionModel().selectFirst();
+                qrCodeService.generarQRCode(productosTable.getSelectionModel().getSelectedItem(), qrImageView);
+            } else {
+                qrImageView.setImage(null);
+            }
         } catch (SQLException exception) {
             mostrarError("No se pudo cargar productos", exception.getMessage());
         }
@@ -306,14 +301,14 @@ public class ProductoController {
 
             Producto producto = existente == null ? new Producto() : existente;
             producto.setCategoria(categoriaCombo.getValue());
-            producto.setSku(skuField.getText().trim());
-            producto.setCodigoBarras(normalizarOpcional(codigoField.getText()));
-            producto.setNombre(nombreField.getText().trim());
-            producto.setDescripcion(normalizarOpcional(descripcionField.getText()));
-            producto.setUnidadMedida(unidadField.getText().trim());
-            producto.setStockMinimo(parseBigDecimal(stockMinimoField.getText(), "stock minimo"));
-            producto.setStockActual(parseBigDecimal(stockActualField.getText(), "stock actual"));
-            producto.setPrecioVenta(parseBigDecimal(precioField.getText(), "precio venta"));
+            producto.setSku(ValidationUtils.requerido(skuField.getText(), "SKU"));
+            producto.setCodigoBarras(ValidationUtils.opcional(codigoField.getText()));
+            producto.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+            producto.setDescripcion(ValidationUtils.opcional(descripcionField.getText()));
+            producto.setUnidadMedida(ValidationUtils.requerido(unidadField.getText(), "unidad de medida"));
+            producto.setStockMinimo(parseNoNegativo(stockMinimoField.getText(), "stock minimo"));
+            producto.setStockActual(parseNoNegativo(stockActualField.getText(), "stock actual"));
+            producto.setPrecioVenta(parseNoNegativo(precioField.getText(), "precio venta"));
             producto.setActivo(true);
             validarProducto(producto);
             return producto;
@@ -343,20 +338,12 @@ public class ProductoController {
         if (producto.getCategoria() == null) {
             throw new IllegalArgumentException("Debe seleccionar una categoria.");
         }
-        if (estaVacio(producto.getSku())) {
-            throw new IllegalArgumentException("El SKU es obligatorio.");
-        }
-        if (estaVacio(producto.getNombre())) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
-        }
-        if (estaVacio(producto.getUnidadMedida())) {
-            throw new IllegalArgumentException("La unidad de medida es obligatoria.");
-        }
-        if (producto.getStockMinimo().compareTo(BigDecimal.ZERO) < 0
-                || producto.getStockActual().compareTo(BigDecimal.ZERO) < 0
-                || producto.getPrecioVenta().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Stock y precio no pueden ser negativos.");
-        }
+        ValidationUtils.requerido(producto.getSku(), "SKU");
+        ValidationUtils.requerido(producto.getNombre(), "nombre");
+        ValidationUtils.requerido(producto.getUnidadMedida(), "unidad de medida");
+        ValidationUtils.requeridoNoNegativo(producto.getStockMinimo(), "stock minimo");
+        ValidationUtils.requeridoNoNegativo(producto.getStockActual(), "stock actual");
+        ValidationUtils.requeridoNoNegativo(producto.getPrecioVenta(), "precio venta");
     }
 
     private Producto obtenerSeleccionado() {
@@ -391,23 +378,16 @@ public class ProductoController {
         }
     }
 
-    private BigDecimal parseBigDecimal(String texto, String campo) {
+    private BigDecimal parseNoNegativo(String texto, String campo) {
         try {
-            return new BigDecimal(texto.trim().replace(",", "."));
+            BigDecimal valor = new BigDecimal(texto.trim().replace(",", "."));
+            if (valor.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("El campo " + campo + " no puede ser negativo.");
+            }
+            return valor;
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("El campo " + campo + " debe ser numerico.");
         }
-    }
-
-    private String normalizarOpcional(String texto) {
-        if (estaVacio(texto)) {
-            return null;
-        }
-        return texto.trim();
-    }
-
-    private boolean estaVacio(String texto) {
-        return texto == null || texto.trim().isEmpty();
     }
 
     private BigDecimal valorSeguro(BigDecimal valor) {

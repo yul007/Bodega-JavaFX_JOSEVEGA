@@ -1,5 +1,9 @@
 package com.bodega.controller;
 
+import com.bodega.dao.KardexDAO;
+import com.bodega.dao.NotaSalidaDAO;
+import com.bodega.dao.ProductoDAO;
+import com.bodega.service.ReporteService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,9 +13,14 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +49,18 @@ public class DashboardController {
 
     private ObservableList<Map<String, Object>> stockBajoData;
 
+    private final ProductoDAO productoDAO = new ProductoDAO();
+    private final KardexDAO kardexDAO = new KardexDAO();
+    private final NotaSalidaDAO notaSalidaDAO = new NotaSalidaDAO();
+
     @FXML
     public void initialize() {
-        // Initialize columns for the Stock Bajo table
-        colProductoStock.setCellValueFactory(new PropertyValueFactory<>("producto"));
-        colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
-        colStockMinimo.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
+        colProductoStock.setCellValueFactory(data ->
+                new SimpleStringProperty(String.valueOf(data.getValue().get("producto"))));
+        colStockActual.setCellValueFactory(data ->
+                new SimpleIntegerProperty((Integer) data.getValue().get("stockActual")).asObject());
+        colStockMinimo.setCellValueFactory(data ->
+                new SimpleIntegerProperty((Integer) data.getValue().get("stockMinimo")).asObject());
 
         stockBajoData = FXCollections.observableArrayList();
         tablaStockBajo.setItems(stockBajoData);
@@ -60,8 +75,71 @@ public class DashboardController {
 
     @FXML
     public void onExportarReporte() {
-        // Export complete dashboard data to a report (CSV/TXT)
-        // Connect with ReporteService for full report export
+        try {
+            List<String[]> datos = stockBajoData.stream()
+                    .map(fila -> new String[] {
+                            String.valueOf(fila.get("producto")),
+                            String.valueOf(fila.get("stockActual")),
+                            String.valueOf(fila.get("stockMinimo"))
+                    })
+                    .toList();
+            ReporteService.generarReporteProductosConStockBajo(datos);
+        } catch (IOException e) {
+            lblValorInventario.setText("No se pudo exportar el reporte.");
+        }
+    }
+
+    private void actualizarValorInventario() {
+        try {
+            BigDecimal valorInventario = kardexDAO.calcularValorInventarioActual();
+            lblValorInventario.setText("Valor Total de Inventario: $" + valorInventario.setScale(2, java.math.RoundingMode.HALF_UP));
+        } catch (SQLException e) {
+            lblValorInventario.setText("Valor Total de Inventario: no disponible");
+        }
+    }
+
+    private void actualizarStockBajo() {
+        try {
+            stockBajoData.setAll(
+                    productoDAO.listarStockBajo().stream()
+                            .map(producto -> Map.<String, Object>of(
+                                    "producto", producto.getNombre(),
+                                    "stockActual", valorEntero(producto.getStockActual()),
+                                    "stockMinimo", valorEntero(producto.getStockMinimo())))
+                            .toList());
+        } catch (SQLException e) {
+            stockBajoData.clear();
+        }
+    }
+
+    private void actualizarTopVendidos() {
+        try {
+            ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+            for (Object[] fila : notaSalidaDAO.listarTopProductosVendidos(5)) {
+                pieChartData.add(new PieChart.Data(
+                        String.valueOf(fila[0]),
+                        ((BigDecimal) fila[1]).doubleValue()));
+            }
+            chartTopVendidos.setData(pieChartData);
+        } catch (SQLException e) {
+            chartTopVendidos.setData(FXCollections.observableArrayList());
+        }
+    }
+
+    private void actualizarVentas30Dias() {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Ventas Últimos 30 Días");
+        try {
+            for (Object[] fila : notaSalidaDAO.listarVentasPorDiaUltimosDias(30)) {
+                LocalDate fecha = (LocalDate) fila[0];
+                BigDecimal total = (BigDecimal) fila[1];
+                series.getData().add(new XYChart.Data<>(fecha.format(DateTimeFormatter.ISO_LOCAL_DATE), total));
+            }
+            chartVentas30Dias.getData().clear();
+            chartVentas30Dias.getData().add(series);
+        } catch (SQLException e) {
+            chartVentas30Dias.getData().clear();
+        }
     }
 
     private void actualizarDatos() {
@@ -71,46 +149,7 @@ public class DashboardController {
         actualizarVentas30Dias();
     }
 
-    private void actualizarValorInventario() {
-        // Simulate value, replace with actual calculation
-        BigDecimal valorInventario = new BigDecimal("150000.00");
-        lblValorInventario.setText("Valor Total de Inventario: $" + valorInventario);
-    }
-
-    private void actualizarStockBajo() {
-        // Replace with actual database fetching logic
-        stockBajoData.setAll(
-            List.of(
-                Map.of("producto", "Producto A", "stockActual", 3, "stockMinimo", 10),
-                Map.of("producto", "Producto B", "stockActual", 2, "stockMinimo", 5),
-                Map.of("producto", "Producto C", "stockActual", 7, "stockMinimo", 8)
-            )
-        );
-    }
-
-    private void actualizarTopVendidos() {
-        // Replace with actual data fetching logic, simulate for now
-        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
-            new PieChart.Data("Producto A", 300),
-            new PieChart.Data("Producto B", 250),
-            new PieChart.Data("Producto C", 200),
-            new PieChart.Data("Producto D", 150),
-            new PieChart.Data("Producto E", 100)
-        );
-        chartTopVendidos.setData(pieChartData);
-    }
-
-    private void actualizarVentas30Dias() {
-        // Replace with actual data, simulate LineChart
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Ventas Últimos 30 Días");
-
-        series.getData().add(new XYChart.Data<>("1", 1000));
-        series.getData().add(new XYChart.Data<>("2", 2000));
-        series.getData().add(new XYChart.Data<>("3", 1500));
-        // Add more data points here...
-
-        chartVentas30Dias.getData().clear();
-        chartVentas30Dias.getData().add(series);
+    private int valorEntero(BigDecimal valor) {
+        return valor == null ? 0 : valor.intValue();
     }
 }

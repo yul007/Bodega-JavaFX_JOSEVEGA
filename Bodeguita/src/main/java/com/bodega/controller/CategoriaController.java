@@ -2,6 +2,7 @@ package com.bodega.controller;
 
 import com.bodega.dao.CategoriaDAO;
 import com.bodega.model.Categoria;
+import com.bodega.util.ValidationUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -78,14 +79,11 @@ public class CategoriaController {
 
         dialog.getDialogPane().setContent(grid);
 
-        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty();
-        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
-
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 Categoria categoria = new Categoria();
-                categoria.setNombre(nombreField.getText());
-                categoria.setDescripcion(descripcionArea.getText());
+                categoria.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+                categoria.setDescripcion(ValidationUtils.opcional(descripcionArea.getText()));
                 categoria.setActivo(true);
                 return categoria;
             }
@@ -138,13 +136,10 @@ public class CategoriaController {
 
         dialog.getDialogPane().setContent(grid);
 
-        javafx.beans.binding.Binding<Boolean> saveDisabled = nombreField.textProperty().isEmpty();
-        dialog.getDialogPane().lookupButton(saveButtonType).disableProperty().bind(saveDisabled);
-
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
-                selected.setNombre(nombreField.getText());
-                selected.setDescripcion(descripcionArea.getText());
+                selected.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
+                selected.setDescripcion(ValidationUtils.opcional(descripcionArea.getText()));
                 return selected;
             }
             return null;

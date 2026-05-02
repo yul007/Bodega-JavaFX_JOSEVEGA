@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS producto (
   codigo_barras VARCHAR(80) NULL,
   nombre VARCHAR(120) NOT NULL,
   descripcion VARCHAR(255) NULL,
-  unidad_medida VARCHAR(20) NOT NULL DEFAULT 'unidad',
   stock_minimo DECIMAL(12,3) NOT NULL DEFAULT 0.000,
   stock_actual DECIMAL(12,3) NOT NULL DEFAULT 0.000,
   precio_venta DECIMAL(10,2) NOT NULL DEFAULT 0.00,

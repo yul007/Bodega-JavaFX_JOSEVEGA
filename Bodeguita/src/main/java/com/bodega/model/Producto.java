@@ -11,7 +11,6 @@ public class Producto {
     private String codigoBarras;
     private String nombre;
     private String descripcion;
-    private String unidadMedida;
     private BigDecimal stockMinimo;
     private BigDecimal stockActual;
     private BigDecimal precioVenta;
@@ -21,12 +20,11 @@ public class Producto {
         this.stockMinimo = BigDecimal.ZERO;
         this.stockActual = BigDecimal.ZERO;
         this.precioVenta = BigDecimal.ZERO;
-        this.unidadMedida = "unidad";
         this.activo = true;
     }
 
     public Producto(int idProducto, Categoria categoria, String sku, String codigoBarras,
-            String nombre, String descripcion, String unidadMedida, BigDecimal stockMinimo,
+            String nombre, String descripcion, BigDecimal stockMinimo,
             BigDecimal stockActual, BigDecimal precioVenta, boolean activo) {
         this.idProducto = idProducto;
         this.categoria = categoria;
@@ -34,7 +32,6 @@ public class Producto {
         this.codigoBarras = codigoBarras;
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.unidadMedida = unidadMedida;
         this.stockMinimo = stockMinimo;
         this.stockActual = stockActual;
         this.precioVenta = precioVenta;
@@ -87,14 +84,6 @@ public class Producto {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
-    }
-
-    public String getUnidadMedida() {
-        return unidadMedida;
-    }
-
-    public void setUnidadMedida(String unidadMedida) {
-        this.unidadMedida = unidadMedida;
     }
 
     public BigDecimal getStockMinimo() {

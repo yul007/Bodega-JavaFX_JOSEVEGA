@@ -42,9 +42,6 @@ public class ProductoController {
     private TextField buscadorField;
 
     @FXML
-    private Label stockAlertaLabel;
-
-    @FXML
     private TableView<Producto> productosTable;
 
     @FXML
@@ -92,7 +89,6 @@ public class ProductoController {
                     ? productoDAO.listarActivos()
                     : productoDAO.buscarPorNombreOCodigo(texto);
             productos.setAll(resultado);
-            actualizarResumenStock();
         } catch (SQLException exception) {
             mostrarError("No se pudo buscar productos", exception.getMessage());
         }
@@ -155,38 +151,6 @@ public class ProductoController {
         }
     }
 
-    // @FXML
-    // private void mostrarQrSeleccionado() {
-    //     Producto seleccionado = obtenerSeleccionado();
-    //     if (seleccionado == null) {
-    //         Platform.runLater(() -> qrImageView.setImage(null));
-    //         return;
-    //     }
-    //     generarQrEnBackground(seleccionado);
-    // }
-
-    //     @FXML
-    // private void mostrarQrSeleccionado() {
-    //     Producto seleccionado = obtenerSeleccionado();
-    //     if (seleccionado == null) {
-    //         qrImageView.setImage(null);
-    //         return;
-    //     }
-        
-    //     // Llamada directa sin hilos ni Platform.runLater
-    //     qrCodeService.generarQRCode(seleccionado, qrImageView);
-    // }
-
-@FXML
-private void mostrarQrSeleccionado() {
-    Producto seleccionado = obtenerSeleccionado();
-    if (seleccionado == null) {
-        Platform.runLater(() -> qrImageView.setImage(null));
-        return;
-    }
-    Platform.runLater(() -> qrCodeService.generarQRCode(seleccionado, qrImageView));
-}
-
     private void configurarTabla() {
         idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto()));
         nombreColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
@@ -231,7 +195,6 @@ private void mostrarQrSeleccionado() {
     private void cargarProductos() {
         try {
             productos.setAll(productoDAO.listarActivos());
-            actualizarResumenStock();
             if (!productos.isEmpty()) {
                 productosTable.getSelectionModel().selectFirst();
                 Producto seleccionado = productosTable.getSelectionModel().getSelectedItem();
@@ -255,7 +218,6 @@ private void mostrarQrSeleccionado() {
         TextField codigoField = new TextField();
         TextField nombreField = new TextField();
         TextField descripcionField = new TextField();
-        TextField unidadField = new TextField("unidad");
         TextField stockMinimoField = new TextField("0");
         TextField stockActualField = new TextField("0");
         TextField precioField = new TextField("0.00");
@@ -271,7 +233,6 @@ private void mostrarQrSeleccionado() {
             codigoField.setText(existente.getCodigoBarras());
             nombreField.setText(existente.getNombre());
             descripcionField.setText(existente.getDescripcion());
-            unidadField.setText(existente.getUnidadMedida());
             stockMinimoField.setText(valorSeguro(existente.getStockMinimo()).toPlainString());
             stockActualField.setText(valorSeguro(existente.getStockActual()).toPlainString());
             precioField.setText(valorSeguro(existente.getPrecioVenta()).toPlainString());
@@ -287,10 +248,9 @@ private void mostrarQrSeleccionado() {
         form.addRow(2, new Label("Codigo barras"), codigoField);
         form.addRow(3, new Label("Nombre"), nombreField);
         form.addRow(4, new Label("Descripcion"), descripcionField);
-        form.addRow(5, new Label("Unidad"), unidadField);
-        form.addRow(6, new Label("Stock minimo"), stockMinimoField);
-        form.addRow(7, new Label("Stock actual"), stockActualField);
-        form.addRow(8, new Label("Precio venta"), precioField);
+        form.addRow(5, new Label("Stock minimo"), stockMinimoField);
+        form.addRow(6, new Label("Stock actual"), stockActualField);
+        form.addRow(7, new Label("Precio venta"), precioField);
         dialog.getDialogPane().setContent(form);
 
         dialog.setResultConverter(button -> {
@@ -304,7 +264,6 @@ private void mostrarQrSeleccionado() {
             producto.setCodigoBarras(normalizarOpcional(codigoField.getText()));
             producto.setNombre(nombreField.getText().trim());
             producto.setDescripcion(normalizarOpcional(descripcionField.getText()));
-            producto.setUnidadMedida(unidadField.getText().trim());
             producto.setStockMinimo(parseBigDecimal(stockMinimoField.getText(), "stock minimo"));
             producto.setStockActual(parseBigDecimal(stockActualField.getText(), "stock actual"));
             producto.setPrecioVenta(parseBigDecimal(precioField.getText(), "precio venta"));
@@ -343,9 +302,6 @@ private void mostrarQrSeleccionado() {
         if (estaVacio(producto.getNombre())) {
             throw new IllegalArgumentException("El nombre es obligatorio.");
         }
-        if (estaVacio(producto.getUnidadMedida())) {
-            throw new IllegalArgumentException("La unidad de medida es obligatoria.");
-        }
         if (producto.getStockMinimo().compareTo(BigDecimal.ZERO) < 0
                 || producto.getStockActual().compareTo(BigDecimal.ZERO) < 0
                 || producto.getPrecioVenta().compareTo(BigDecimal.ZERO) < 0) {
@@ -359,15 +315,6 @@ private void mostrarQrSeleccionado() {
             mostrarError("Seleccion requerida", "Selecciona un producto de la tabla.");
         }
         return seleccionado;
-    }
-
-    private void actualizarResumenStock() {
-        long stockBajo = productos.stream()
-                .filter(producto -> valorSeguro(producto.getStockActual()).compareTo(valorSeguro(producto.getStockMinimo())) <= 0)
-                .count();
-        stockAlertaLabel.setText(stockBajo == 0
-                ? "Sin productos con stock bajo"
-                : "Productos con stock bajo o al minimo: " + stockBajo);
     }
 
     private void navegarA(String rutaFxml, String tituloModulo) {

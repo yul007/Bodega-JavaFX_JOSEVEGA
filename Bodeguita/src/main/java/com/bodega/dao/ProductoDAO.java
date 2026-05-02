@@ -19,7 +19,7 @@ public class ProductoDAO {
 
     private static final String SELECT_PRODUCTO_CON_CATEGORIA = """
             SELECT p.id_producto, p.id_categoria, p.sku, p.codigo_barras, p.nombre,
-                   p.descripcion, p.unidad_medida, p.stock_minimo, p.stock_actual,
+                   p.descripcion, p.stock_minimo, p.stock_actual,
                    p.precio_venta, p.activo,
                    c.nombre AS categoria_nombre, c.descripcion AS categoria_descripcion,
                    c.activo AS categoria_activo
@@ -37,10 +37,10 @@ public class ProductoDAO {
         validarProducto(producto);
         String sql = """
                 INSERT INTO producto (
-                  id_categoria, sku, codigo_barras, nombre, descripcion, unidad_medida,
+                  id_categoria, sku, codigo_barras, nombre, descripcion,
                   stock_minimo, stock_actual, precio_venta, activo
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection connection = databaseConnection.getConnection();
@@ -149,7 +149,7 @@ public class ProductoDAO {
         String sql = """
                 UPDATE producto
                 SET id_categoria = ?, sku = ?, codigo_barras = ?, nombre = ?, descripcion = ?,
-                    unidad_medida = ?, stock_minimo = ?, stock_actual = ?, precio_venta = ?, activo = ?
+                    stock_minimo = ?, stock_actual = ?, precio_venta = ?, activo = ?
                 WHERE id_producto = ?
                 """;
 
@@ -190,11 +190,10 @@ public class ProductoDAO {
         statement.setString(3, producto.getCodigoBarras());
         statement.setString(4, producto.getNombre());
         statement.setString(5, producto.getDescripcion());
-        statement.setString(6, producto.getUnidadMedida());
-        statement.setBigDecimal(7, producto.getStockMinimo());
-        statement.setBigDecimal(8, producto.getStockActual());
-        statement.setBigDecimal(9, producto.getPrecioVenta());
-        statement.setBoolean(10, producto.isActivo());
+        statement.setBigDecimal(6, producto.getStockMinimo());
+        statement.setBigDecimal(7, producto.getStockActual());
+        statement.setBigDecimal(8, producto.getPrecioVenta());
+        statement.setBoolean(9, producto.isActivo());
     }
 
     private void validarProducto(Producto producto) {
@@ -203,7 +202,6 @@ public class ProductoDAO {
         }
         ValidationUtils.requerido(producto.getSku(), "SKU");
         ValidationUtils.requerido(producto.getNombre(), "nombre");
-        ValidationUtils.requerido(producto.getUnidadMedida(), "unidad de medida");
         ValidationUtils.requeridoNoNegativo(producto.getStockMinimo(), "stock minimo");
         ValidationUtils.requeridoNoNegativo(producto.getStockActual(), "stock actual");
         ValidationUtils.requeridoNoNegativo(producto.getPrecioVenta(), "precio venta");
@@ -238,7 +236,6 @@ public class ProductoDAO {
                 resultSet.getString("codigo_barras"),
                 resultSet.getString("nombre"),
                 resultSet.getString("descripcion"),
-                resultSet.getString("unidad_medida"),
                 resultSet.getBigDecimal("stock_minimo"),
                 resultSet.getBigDecimal("stock_actual"),
                 resultSet.getBigDecimal("precio_venta"),

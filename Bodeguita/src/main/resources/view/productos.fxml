@@ -24,7 +24,6 @@
                     <children>
                         <TextField fx:id="buscadorField" onAction="#buscarProducto" prefWidth="320.0" promptText="Buscar por nombre, SKU o codigo" />
                         <Button onAction="#buscarProducto" styleClass="primary-button" text="Buscar" />
-                        <Label fx:id="stockAlertaLabel" styleClass="stock-summary" text="Productos con stock bajo: 0" />
                     </children>
                 </HBox>
 
@@ -45,7 +44,6 @@
                         <Button onAction="#inactivarProducto" styleClass="danger-button" text="Eliminar/Inactivar" />
                         <Button onAction="#verLotes" text="Ver Lotes" />
                         <Button onAction="#nuevaSalida" text="Nueva Salida" />
-                        <Button mnemonicParsing="false" onAction="#mostrarQrSeleccionado" text="Ver QR" />
                     </children>
                 </HBox>
 

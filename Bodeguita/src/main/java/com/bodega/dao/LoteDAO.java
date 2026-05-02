@@ -1,6 +1,5 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Categoria;
 import com.bodega.model.Lote;
 import com.bodega.model.Producto;
@@ -8,6 +7,7 @@ import com.bodega.model.Proveedor;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,15 +37,13 @@ public class LoteDAO {
             JOIN proveedor pr ON pr.id_proveedor = l.id_proveedor
             """;
 
-    private final DatabaseConnection databaseConnection;
-
-    public LoteDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(Lote lote) throws SQLException {
         validarLote(lote);
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             return crear(connection, lote);
         }
     }
@@ -57,7 +55,7 @@ public class LoteDAO {
                   id_producto, id_proveedor, codigo_lote, cantidad, cantidad_disponible,
                   costo_unitario, fecha_ingreso, factura_referencia, activo
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -75,7 +73,7 @@ public class LoteDAO {
     public Optional<Lote> buscarPorId(int idLote) throws SQLException {
         String sql = SELECT_LOTE_RELACIONADO + " WHERE l.id_lote = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idLote);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -91,7 +89,7 @@ public class LoteDAO {
         String sql = SELECT_LOTE_RELACIONADO
                 + " WHERE l.id_producto = ? ORDER BY l.fecha_ingreso, l.id_lote";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -108,7 +106,7 @@ public class LoteDAO {
         String sql = SELECT_LOTE_RELACIONADO
                 + " WHERE l.id_proveedor = ? ORDER BY l.fecha_ingreso DESC, l.id_lote DESC";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProveedor);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -153,7 +151,7 @@ public class LoteDAO {
                 WHERE id_lote = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             prepararInsertUpdate(statement, lote);
             statement.setInt(11, lote.getIdLote());
@@ -175,7 +173,7 @@ public class LoteDAO {
     public boolean inactivar(int idLote) throws SQLException {
         String sql = "UPDATE lote SET activo = FALSE WHERE id_lote = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idLote);
             return statement.executeUpdate() > 0;
@@ -214,7 +212,7 @@ public class LoteDAO {
     }
 
     private List<Lote> consultarLista(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Lote> lotes = new ArrayList<>();

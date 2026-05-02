@@ -2,7 +2,6 @@ package com.bodega.service;
 
 import com.bodega.dao.KardexDAO;
 import com.bodega.dao.NotaSalidaDAO;
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.DetalleFIFO;
 import com.bodega.model.DetalleSalida;
 import com.bodega.model.MovimientoKardex;
@@ -11,6 +10,7 @@ import com.bodega.model.ResultadoFIFO;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,13 +22,14 @@ public class NotaSalidaService {
     private static final int MONEY_SCALE = 2;
     private static final BigDecimal IVA_RATE = new BigDecimal("0.12");
 
-    private final DatabaseConnection databaseConnection;
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
     private final NotaSalidaDAO notaSalidaDAO;
     private final KardexDAO kardexDAO;
     private final FIFOInventoryService fifoInventoryService;
 
     public NotaSalidaService() {
-        this.databaseConnection = DatabaseConnection.getInstance();
         this.notaSalidaDAO = new NotaSalidaDAO();
         this.kardexDAO = new KardexDAO();
         this.fifoInventoryService = new FIFOInventoryService();
@@ -37,7 +38,7 @@ public class NotaSalidaService {
     public NotaSalida crearNotaSalida(NotaSalida notaSalida, List<DetalleSalida> detalles) throws SQLException {
         validarNotaSalida(notaSalida, detalles);
 
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             boolean autoCommitOriginal = connection.getAutoCommit();
             connection.setAutoCommit(false);
 

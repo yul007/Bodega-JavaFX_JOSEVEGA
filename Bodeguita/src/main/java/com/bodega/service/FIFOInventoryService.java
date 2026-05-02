@@ -2,7 +2,6 @@ package com.bodega.service;
 
 import com.bodega.dao.LoteDAO;
 import com.bodega.dao.ProductoDAO;
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.DetalleFIFO;
 import com.bodega.model.Lote;
 import com.bodega.model.Producto;
@@ -10,6 +9,7 @@ import com.bodega.model.ResultadoFIFO;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,13 @@ public class FIFOInventoryService {
 
     private static final int MONEY_SCALE = 2;
 
-    private final DatabaseConnection databaseConnection;
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
     private final ProductoDAO productoDAO;
     private final LoteDAO loteDAO;
 
     public FIFOInventoryService() {
-        this.databaseConnection = DatabaseConnection.getInstance();
         this.productoDAO = new ProductoDAO();
         this.loteDAO = new LoteDAO();
     }
@@ -32,7 +33,7 @@ public class FIFOInventoryService {
     public ResultadoFIFO aplicarSalidaFIFO(int idProducto, BigDecimal cantidadSolicitada) throws SQLException {
         validarCantidad(cantidadSolicitada);
 
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             boolean autoCommitOriginal = connection.getAutoCommit();
             connection.setAutoCommit(false);
 

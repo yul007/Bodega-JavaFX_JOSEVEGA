@@ -1,10 +1,10 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,11 +27,9 @@ public class ProductoDAO {
             JOIN categoria c ON c.id_categoria = p.id_categoria
             """;
 
-    private final DatabaseConnection databaseConnection;
-
-    public ProductoDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(Producto producto) throws SQLException {
         validarProducto(producto);
@@ -43,7 +41,7 @@ public class ProductoDAO {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             prepararInsertUpdate(statement, producto);
             statement.executeUpdate();
@@ -67,7 +65,7 @@ public class ProductoDAO {
         String sql = SELECT_PRODUCTO_CON_CATEGORIA
                 + " WHERE p.id_producto = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -98,7 +96,7 @@ public class ProductoDAO {
         String sql = SELECT_PRODUCTO_CON_CATEGORIA
                 + " WHERE p.sku = ? OR p.codigo_barras = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, codigo);
             statement.setString(2, codigo);
@@ -118,7 +116,7 @@ public class ProductoDAO {
                   ORDER BY p.nombre
                   """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             String filtro = "%" + texto + "%";
             statement.setString(1, filtro);
@@ -151,7 +149,7 @@ public class ProductoDAO {
                 WHERE id_producto = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             prepararInsertUpdate(statement, producto);
             statement.setInt(11, producto.getIdProducto());
@@ -175,7 +173,7 @@ public class ProductoDAO {
     public boolean inactivar(int idProducto) throws SQLException {
         String sql = "UPDATE producto SET activo = FALSE WHERE id_producto = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             return statement.executeUpdate() > 0;
@@ -209,7 +207,7 @@ public class ProductoDAO {
     }
 
     private List<Producto> consultarLista(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Producto> productos = new ArrayList<>();

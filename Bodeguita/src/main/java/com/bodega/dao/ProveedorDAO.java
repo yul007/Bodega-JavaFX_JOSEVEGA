@@ -1,8 +1,8 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Proveedor;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,11 +14,9 @@ import java.util.Optional;
 /** DAO para operaciones CRUD de proveedores. */
 public class ProveedorDAO {
 
-    private final DatabaseConnection databaseConnection;
-
-    public ProveedorDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(Proveedor proveedor) throws SQLException {
         String sql = """
@@ -26,7 +24,7 @@ public class ProveedorDAO {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, proveedor.getRuc());
             statement.setString(2, proveedor.getNombre());
@@ -66,7 +64,7 @@ public class ProveedorDAO {
                 WHERE id_proveedor = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProveedor);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -86,7 +84,7 @@ public class ProveedorDAO {
                 ORDER BY nombre
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             String filtro = "%" + texto + "%";
             statement.setString(1, filtro);
@@ -108,7 +106,7 @@ public class ProveedorDAO {
                 WHERE id_proveedor = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, proveedor.getRuc());
             statement.setString(2, proveedor.getNombre());
@@ -125,7 +123,7 @@ public class ProveedorDAO {
     public boolean inactivar(int idProveedor) throws SQLException {
         String sql = "UPDATE proveedor SET activo = FALSE WHERE id_proveedor = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProveedor);
             return statement.executeUpdate() > 0;
@@ -133,7 +131,7 @@ public class ProveedorDAO {
     }
 
     private List<Proveedor> consultarLista(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Proveedor> proveedores = new ArrayList<>();

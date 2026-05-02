@@ -1,8 +1,8 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Cliente;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,11 +14,9 @@ import java.util.Optional;
 /** DAO para operaciones CRUD de clientes. */
 public class ClienteDAO {
 
-    private final DatabaseConnection databaseConnection;
-
-    public ClienteDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(Cliente cliente) throws SQLException {
         String sql = """
@@ -26,7 +24,7 @@ public class ClienteDAO {
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, cliente.getIdentificacion());
             statement.setString(2, cliente.getNombre());
@@ -65,7 +63,7 @@ public class ClienteDAO {
                 WHERE id_cliente = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCliente);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -85,7 +83,7 @@ public class ClienteDAO {
                 ORDER BY nombre
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             String filtro = "%" + texto + "%";
             statement.setString(1, filtro);
@@ -107,7 +105,7 @@ public class ClienteDAO {
                 WHERE id_cliente = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, cliente.getIdentificacion());
             statement.setString(2, cliente.getNombre());
@@ -123,7 +121,7 @@ public class ClienteDAO {
     public boolean inactivar(int idCliente) throws SQLException {
         String sql = "UPDATE cliente SET activo = FALSE WHERE id_cliente = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCliente);
             return statement.executeUpdate() > 0;
@@ -131,7 +129,7 @@ public class ClienteDAO {
     }
 
     private List<Cliente> consultarLista(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Cliente> clientes = new ArrayList<>();

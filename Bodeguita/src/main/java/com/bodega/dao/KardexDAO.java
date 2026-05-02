@@ -1,6 +1,5 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Categoria;
 import com.bodega.model.Lote;
 import com.bodega.model.MovimientoKardex;
@@ -8,6 +7,7 @@ import com.bodega.model.NotaSalida;
 import com.bodega.model.Producto;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,14 +42,12 @@ public class KardexDAO {
             LEFT JOIN nota_salida ns ON ns.id_salida = mk.id_salida
             """;
 
-    private final DatabaseConnection databaseConnection;
-
-    public KardexDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(MovimientoKardex movimiento) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             return crear(connection, movimiento);
         }
     }
@@ -90,7 +88,7 @@ public class KardexDAO {
         String sql = SELECT_KARDEX_RELACIONADO
                 + " WHERE mk.id_producto = ? ORDER BY mk.fecha, mk.id_movimiento";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -108,7 +106,7 @@ public class KardexDAO {
                   ORDER BY mk.fecha, mk.id_movimiento
                   """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             statement.setDate(2, java.sql.Date.valueOf(desde));
@@ -127,7 +125,7 @@ public class KardexDAO {
                   LIMIT 1
                   """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idProducto);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -172,7 +170,7 @@ public class KardexDAO {
                   AND cantidad_disponible > 0
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next()) {
@@ -216,7 +214,7 @@ public class KardexDAO {
                 ORDER BY p.nombre
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Object[]> filas = new ArrayList<>();

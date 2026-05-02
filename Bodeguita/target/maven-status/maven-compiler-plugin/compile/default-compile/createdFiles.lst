@@ -26,7 +26,6 @@ com/bodega/dao/ProveedorDAO.class
 com/bodega/model/Lote.class
 com/bodega/controller/ProveedorController.class
 com/bodega/model/DetalleSalida.class
-com/bodega/db/DatabaseConnection.class
 com/bodega/App.class
 com/bodega/dao/LoteDAO.class
 com/bodega/dao/CategoriaDAO.class

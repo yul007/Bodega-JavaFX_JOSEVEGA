@@ -1,8 +1,8 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Categoria;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,11 +14,9 @@ import java.util.Optional;
 /** DAO para operaciones CRUD de categorias. */
 public class CategoriaDAO {
 
-    private final DatabaseConnection databaseConnection;
-
-    public CategoriaDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(Categoria categoria) throws SQLException {
         String sql = """
@@ -26,7 +24,7 @@ public class CategoriaDAO {
                 VALUES (?, ?, ?)
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, categoria.getNombre());
             statement.setString(2, categoria.getDescripcion());
@@ -62,7 +60,7 @@ public class CategoriaDAO {
                 WHERE id_categoria = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCategoria);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -82,7 +80,7 @@ public class CategoriaDAO {
                 ORDER BY nombre
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, "%" + texto + "%");
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -102,7 +100,7 @@ public class CategoriaDAO {
                 WHERE id_categoria = ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, categoria.getNombre());
             statement.setString(2, categoria.getDescripcion());
@@ -115,7 +113,7 @@ public class CategoriaDAO {
     public boolean inactivar(int idCategoria) throws SQLException {
         String sql = "UPDATE categoria SET activo = FALSE WHERE id_categoria = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idCategoria);
             return statement.executeUpdate() > 0;
@@ -123,7 +121,7 @@ public class CategoriaDAO {
     }
 
     private List<Categoria> consultarLista(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<Categoria> categorias = new ArrayList<>();

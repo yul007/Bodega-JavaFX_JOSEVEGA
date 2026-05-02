@@ -1,6 +1,5 @@
 package com.bodega.dao;
 
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Cliente;
 import com.bodega.model.DetalleSalida;
 import com.bodega.model.Lote;
@@ -8,6 +7,7 @@ import com.bodega.model.NotaSalida;
 import com.bodega.model.Producto;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,14 +31,12 @@ public class NotaSalidaDAO {
             JOIN cliente c ON c.id_cliente = ns.id_cliente
             """;
 
-    private final DatabaseConnection databaseConnection;
-
-    public NotaSalidaDAO() {
-        this.databaseConnection = DatabaseConnection.getInstance();
-    }
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
 
     public int crear(NotaSalida notaSalida) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             return crear(connection, notaSalida);
         }
     }
@@ -104,7 +102,7 @@ public class NotaSalidaDAO {
     public Optional<NotaSalida> buscarPorId(int idSalida) throws SQLException {
         String sql = SELECT_NOTA_CON_CLIENTE + " WHERE ns.id_salida = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idSalida);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -119,7 +117,7 @@ public class NotaSalidaDAO {
     public Optional<NotaSalida> buscarPorNumeroFactura(String numeroFactura) throws SQLException {
         String sql = SELECT_NOTA_CON_CLIENTE + " WHERE ns.numero_factura = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, numeroFactura);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -138,7 +136,7 @@ public class NotaSalidaDAO {
                   ORDER BY ns.fecha_emision DESC, ns.id_salida DESC
                   """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setDate(1, Date.valueOf(desde));
             statement.setDate(2, Date.valueOf(hasta));
@@ -165,7 +163,7 @@ public class NotaSalidaDAO {
                 ORDER BY ds.id_detalle_salida
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, idSalida);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -181,7 +179,7 @@ public class NotaSalidaDAO {
     public boolean actualizarEstado(int idSalida, String estado) throws SQLException {
         String sql = "UPDATE nota_salida SET estado = ? WHERE id_salida = ?";
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, estado);
             statement.setInt(2, idSalida);
@@ -218,7 +216,7 @@ public class NotaSalidaDAO {
                 LIMIT ?
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, limite);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -243,7 +241,7 @@ public class NotaSalidaDAO {
                 ORDER BY fecha_dia
                 """;
 
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, dias);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -260,7 +258,7 @@ public class NotaSalidaDAO {
     }
 
     private List<NotaSalida> consultarNotas(String sql) throws SQLException {
-        try (Connection connection = databaseConnection.getConnection();
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             List<NotaSalida> notas = new ArrayList<>();

@@ -3,13 +3,13 @@ package com.bodega.service;
 import com.bodega.dao.KardexDAO;
 import com.bodega.dao.LoteDAO;
 import com.bodega.dao.ProductoDAO;
-import com.bodega.db.DatabaseConnection;
 import com.bodega.model.Lote;
 import com.bodega.model.MovimientoKardex;
 import com.bodega.model.Producto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -19,13 +19,14 @@ public class LoteCompraService {
 
     private static final int MONEY_SCALE = 2;
 
-    private final DatabaseConnection databaseConnection;
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "holacomo";
     private final ProductoDAO productoDAO;
     private final LoteDAO loteDAO;
     private final KardexDAO kardexDAO;
 
     public LoteCompraService() {
-        this.databaseConnection = DatabaseConnection.getInstance();
         this.productoDAO = new ProductoDAO();
         this.loteDAO = new LoteDAO();
         this.kardexDAO = new KardexDAO();
@@ -34,7 +35,7 @@ public class LoteCompraService {
     public Lote registrarLoteCompra(Lote lote) throws SQLException {
         validarLote(lote);
 
-        try (Connection connection = databaseConnection.getConnection()) {
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             boolean autoCommitOriginal = connection.getAutoCommit();
             connection.setAutoCommit(false);
 

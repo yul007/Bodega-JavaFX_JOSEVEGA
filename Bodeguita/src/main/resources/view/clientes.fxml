@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ClienteController">
+<BorderPane prefHeight="650.0" prefWidth="1000.0" styleClass="module-shell" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bodega.controller.ClienteController">
     <top>
         <VBox spacing="4.0" styleClass="header-bar">
             <padding>
@@ -29,7 +29,7 @@
                     <children>
                         <TextField fx:id="buscadorField" onAction="#buscarCliente" prefWidth="320.0" promptText="Buscar por nombre o identificacion" />
                         <Button onAction="#buscarCliente" styleClass="primary-button" text="Buscar" />
-                        <Button onAction="#listarClientes" styleClass="secondary-button" text="Listar" />
+                        <Button onAction="#listarClientes" styleClass="secondary-button" text="Limpiar" />
                         <Label fx:id="resumenLabel" styleClass="screen-subtitle" text="Clientes activos: 0" />
                     </children>
                 </HBox>

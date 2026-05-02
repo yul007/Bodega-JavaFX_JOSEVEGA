@@ -4,7 +4,6 @@ import com.bodega.dao.KardexDAO;
 import com.bodega.dao.ProductoDAO;
 import com.bodega.model.MovimientoKardex;
 import com.bodega.model.Producto;
-import com.bodega.service.ReporteService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -106,15 +105,7 @@ public class KardexController {
         cargarKardex();
     }
 
-    @FXML
-    private void onExportarCSV() {
-        exportar("csv");
-    }
 
-    @FXML
-    private void onExportarTXT() {
-        exportar("txt");
-    }
 
     private void cargarProductos() {
         try {
@@ -146,37 +137,6 @@ public class KardexController {
         }
     }
 
-    private void exportar(String formato) {
-        try {
-            Producto producto = comboProducto.getValue();
-            if (producto == null) {
-                throw new IllegalArgumentException("Debe seleccionar un producto para exportar el Kardex.");
-            }
-
-            List<String[]> datos = movimientos.stream()
-                    .map(movimiento -> new String[] {
-                            String.valueOf(movimiento.getFecha()),
-                            movimiento.getTipo(),
-                            producto.getNombre(),
-                            valorTexto(valorMovimiento(movimiento)),
-                            valorTexto(costoUnitario(movimiento)),
-                            valorTexto(movimiento.getSaldoCantidad()),
-                            valorTexto(movimiento.getSaldoValor()),
-                            movimiento.getReferencia() == null ? "" : movimiento.getReferencia()
-                    })
-                    .toList();
-
-            if ("txt".equalsIgnoreCase(formato)) {
-                ReporteService.generarReporteKardexPorProducto(producto, datos);
-            } else {
-                ReporteService.generarReporteKardexPorProducto(producto, datos);
-            }
-
-            mostrarInfo("Kardex exportado correctamente.");
-        } catch (IllegalArgumentException | IOException e) {
-            mostrarError(e.getMessage());
-        }
-    }
 
     private BigDecimal valorMovimiento(MovimientoKardex movimiento) {
         if (movimiento.getCantidadEntrada() != null && movimiento.getCantidadEntrada().compareTo(BigDecimal.ZERO) > 0) {

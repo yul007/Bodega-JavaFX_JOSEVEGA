@@ -73,21 +73,6 @@ public class DashboardController {
         actualizarDatos();
     }
 
-    @FXML
-    public void onExportarReporte() {
-        try {
-            List<String[]> datos = stockBajoData.stream()
-                    .map(fila -> new String[] {
-                            String.valueOf(fila.get("producto")),
-                            String.valueOf(fila.get("stockActual")),
-                            String.valueOf(fila.get("stockMinimo"))
-                    })
-                    .toList();
-            ReporteService.generarReporteProductosConStockBajo(datos);
-        } catch (IOException e) {
-            lblValorInventario.setText("No se pudo exportar el reporte.");
-        }
-    }
 
     private void actualizarValorInventario() {
         try {

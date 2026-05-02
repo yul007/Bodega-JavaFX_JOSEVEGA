@@ -1,9 +1,9 @@
 REPORTE DE VALOR DE INVENTARIO
-Valor Total: $202.35000
+Valor Total: $201.35000
 
 Producto                 Cantidad     Valor Total 
 Agua 625ml               45.00        11.25       
-Agua de Coco             1.00         1.00        
+Agua de Coco             0.00         0.00        
 Arroz Flor 1kg           80.00        65.60       
 Coca-Cola 3L             30.00        46.50       
 Detergente 1kg           40.00        78.00       

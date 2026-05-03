@@ -20,7 +20,9 @@ public class LoginController {
     private static final String DEMO_PASSWORD = "admin";
     private static final String LOGIN_SOUND = "/audio/login.mp3";
 
-    private final MusicPlayer loginSoundPlayer = MusicPlayer.cargarDesdeResources(LOGIN_SOUND);
+    //private final MusicPlayer loginSoundPlayer = MusicPlayer.cargarDesdeResources(LOGIN_SOUND);
+    private final MusicPlayer loginSoundPlayer = new MusicPlayer(LOGIN_SOUND, false);
+
 
     @FXML private TextField usuarioField;
     @FXML private PasswordField contrasenaField;

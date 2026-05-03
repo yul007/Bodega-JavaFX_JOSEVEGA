@@ -4,18 +4,16 @@ import com.bodega.model.Categoria;
 import com.bodega.model.Producto;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import com.bodega.util.ValidationUtils;
 
 /** DAO para productos y consultas de stock. */
-public class ProductoDAO {
+public class ProductoDAO extends JdbcDaoSupport {
 
     private static final String SELECT_PRODUCTO_CON_CATEGORIA = """
             SELECT p.id_producto, p.id_categoria, p.sku, p.codigo_barras, p.nombre,
@@ -27,10 +25,6 @@ public class ProductoDAO {
             JOIN categoria c ON c.id_categoria = p.id_categoria
             """;
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "holacomo";
-
     public int crear(Producto producto) throws SQLException {
         validarProducto(producto);
         String sql = """
@@ -41,103 +35,36 @@ public class ProductoDAO {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             prepararInsertUpdate(statement, producto);
             statement.executeUpdate();
-            return leerIdGenerado(statement);
+            return leerIdGenerado(statement, "No se pudo obtener el ID generado para el producto.");
         }
     }
 
     public List<Producto> listarActivos() throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + " WHERE p.activo = TRUE ORDER BY p.nombre";
-        return consultarLista(sql);
-    }
-
-    public List<Producto> listarTodos() throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + " ORDER BY p.nombre";
-        return consultarLista(sql);
-    }
-
-    public Optional<Producto> buscarPorId(int idProducto) throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + " WHERE p.id_producto = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearProducto(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
+        return consultarProductos(" WHERE p.activo = TRUE ORDER BY p.nombre");
     }
 
     public Optional<Producto> buscarPorIdParaActualizar(Connection connection, int idProducto) throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + " WHERE p.id_producto = ? FOR UPDATE";
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearProducto(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<Producto> buscarPorCodigo(String codigo) throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + " WHERE p.sku = ? OR p.codigo_barras = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, codigo);
-            statement.setString(2, codigo);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearProducto(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
+        return consultarProducto(connection, " WHERE p.id_producto = ? FOR UPDATE",
+                statement -> statement.setInt(1, idProducto));
     }
 
     public List<Producto> buscarPorNombre(String texto) throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + """
-                  WHERE p.nombre LIKE ?
-                  ORDER BY p.nombre
-                  """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            String filtro = "%" + texto + "%";
-            statement.setString(1, filtro);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<Producto> productos = new ArrayList<>();
-                while (resultSet.next()) {
-                    productos.add(mapearProducto(resultSet));
-                }
-                return productos;
-            }
-        }
+        return consultarProductos("""
+                WHERE p.nombre LIKE ?
+                ORDER BY p.nombre
+                """, statement -> statement.setString(1, "%" + texto + "%"));
     }
 
     public List<Producto> listarStockBajo() throws SQLException {
-        String sql = SELECT_PRODUCTO_CON_CATEGORIA
-                + """
-                  WHERE p.activo = TRUE
-                    AND p.stock_actual <= p.stock_minimo
-                  ORDER BY p.stock_actual ASC, p.nombre
-                  """;
-        return consultarLista(sql);
+        return consultarProductos("""
+                WHERE p.activo = TRUE
+                  AND p.stock_actual <= p.stock_minimo
+                ORDER BY p.stock_actual ASC, p.nombre
+                """);
     }
 
     public boolean actualizar(Producto producto) throws SQLException {
@@ -149,7 +76,7 @@ public class ProductoDAO {
                 WHERE id_producto = ?
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             prepararInsertUpdate(statement, producto);
             statement.setInt(11, producto.getIdProducto());
@@ -163,21 +90,16 @@ public class ProductoDAO {
         }
         String sql = "UPDATE producto SET stock_actual = ? WHERE id_producto = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        return ejecutarActualizacion(connection, sql, statement -> {
             statement.setBigDecimal(1, nuevoStock);
             statement.setInt(2, idProducto);
-            return statement.executeUpdate() > 0;
-        }
+        });
     }
 
     public boolean inactivar(int idProducto) throws SQLException {
         String sql = "UPDATE producto SET activo = FALSE WHERE id_producto = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            return statement.executeUpdate() > 0;
-        }
+        return ejecutarActualizacion(sql, statement -> statement.setInt(1, idProducto));
     }
 
     private void prepararInsertUpdate(PreparedStatement statement, Producto producto) throws SQLException {
@@ -192,6 +114,21 @@ public class ProductoDAO {
         statement.setBoolean(9, producto.isActivo());
     }
 
+    private List<Producto> consultarProductos(String complementoSql) throws SQLException {
+        return consultarLista(SELECT_PRODUCTO_CON_CATEGORIA + complementoSql, null, this::mapearProducto);
+    }
+
+    private List<Producto> consultarProductos(String complementoSql, StatementConfigurer configurador)
+            throws SQLException {
+        return consultarLista(SELECT_PRODUCTO_CON_CATEGORIA + complementoSql, configurador, this::mapearProducto);
+    }
+
+    private Optional<Producto> consultarProducto(Connection connection, String complementoSql,
+            StatementConfigurer configurador) throws SQLException {
+        return consultarUno(connection, SELECT_PRODUCTO_CON_CATEGORIA + complementoSql, configurador,
+                this::mapearProducto);
+    }
+
     private void validarProducto(Producto producto) {
         if (producto == null) {
             throw new IllegalArgumentException("El producto es obligatorio.");
@@ -203,18 +140,6 @@ public class ProductoDAO {
         ValidationUtils.requeridoNoNegativo(producto.getPrecioVenta(), "precio venta");
         if (producto.getCategoria() == null) {
             throw new IllegalArgumentException("Debe seleccionar una categoria.");
-        }
-    }
-
-    private List<Producto> consultarLista(String sql) throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            List<Producto> productos = new ArrayList<>();
-            while (resultSet.next()) {
-                productos.add(mapearProducto(resultSet));
-            }
-            return productos;
         }
     }
 
@@ -236,14 +161,5 @@ public class ProductoDAO {
                 resultSet.getBigDecimal("stock_actual"),
                 resultSet.getBigDecimal("precio_venta"),
                 resultSet.getBoolean("activo"));
-    }
-
-    private int leerIdGenerado(PreparedStatement statement) throws SQLException {
-        try (ResultSet keys = statement.getGeneratedKeys()) {
-            if (keys.next()) {
-                return keys.getInt(1);
-            }
-        }
-        throw new SQLException("No se pudo obtener el ID generado para el producto.");
     }
 }

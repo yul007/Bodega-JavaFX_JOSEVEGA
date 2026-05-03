@@ -2,6 +2,7 @@ com/bodega/controller/CategoriaController.class
 com/bodega/controller/DashboardController.class
 com/bodega/service/QrCodeService.class
 com/bodega/model/KardexRegistro.class
+com/bodega/dao/JdbcDaoSupport.class
 com/bodega/controller/ProductoController.class
 com/bodega/model/Producto.class
 com/bodega/controller/LoginController.class
@@ -26,6 +27,7 @@ com/bodega/dao/ProveedorDAO.class
 com/bodega/model/Lote.class
 com/bodega/controller/ProveedorController.class
 com/bodega/model/DetalleSalida.class
+com/bodega/dao/JdbcDaoSupport$RowMapper.class
 com/bodega/App.class
 com/bodega/dao/LoteDAO.class
 com/bodega/dao/CategoriaDAO.class
@@ -41,5 +43,6 @@ com/bodega/model/NotaSalida.class
 com/bodega/model/Categoria.class
 com/bodega/controller/KardexController.class
 com/bodega/controller/LoteController.class
+com/bodega/dao/JdbcDaoSupport$StatementConfigurer.class
 com/bodega/controller/package-info.class
 com/bodega/util/MusicPlayer.class

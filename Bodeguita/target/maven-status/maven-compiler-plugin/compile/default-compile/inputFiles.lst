@@ -13,6 +13,7 @@
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/controller/package-info.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/CategoriaDAO.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/ClienteDAO.java
+/Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/JdbcDaoSupport.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/KardexDAO.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/LoteDAO.java
 /Users/yulianaguerra/Downloads/CLASES/APPS/ConexionesProyectosTodos/0TODAS_LAS_IAs/Bodega_Microempresas1/Bodeguita/src/main/java/com/bodega/dao/NotaSalidaDAO.java

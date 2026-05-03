@@ -7,7 +7,6 @@ import com.bodega.model.NotaSalida;
 import com.bodega.model.Producto;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 /** DAO para notas de salida, ventas y detalles asociados. */
-public class NotaSalidaDAO {
+public class NotaSalidaDAO extends JdbcDaoSupport {
 
     private static final String SELECT_NOTA_CON_CLIENTE = """
             SELECT ns.id_salida, ns.numero_factura, ns.fecha_emision, ns.subtotal,
@@ -31,12 +30,8 @@ public class NotaSalidaDAO {
             JOIN cliente c ON c.id_cliente = ns.id_cliente
             """;
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "holacomo";
-
     public int crear(NotaSalida notaSalida) throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = abrirConexion()) {
             return crear(connection, notaSalida);
         }
     }
@@ -62,7 +57,7 @@ public class NotaSalidaDAO {
             statement.setString(9, notaSalida.getEstado());
             statement.setString(10, notaSalida.getObservaciones());
             statement.executeUpdate();
-            return leerIdGenerado(statement);
+            return leerIdGenerado(statement, "No se pudo obtener el ID generado para la nota de salida.");
         }
     }
 
@@ -90,101 +85,24 @@ public class NotaSalidaDAO {
             statement.setBigDecimal(8, detalle.getCostoTotalFifo());
             statement.setBigDecimal(9, detalle.getUtilidad());
             statement.executeUpdate();
-            return leerIdGenerado(statement);
+            return leerIdGenerado(statement, "No se pudo obtener el ID generado para el detalle de salida.");
         }
-    }
-
-    public List<NotaSalida> listarTodas() throws SQLException {
-        String sql = SELECT_NOTA_CON_CLIENTE + " ORDER BY ns.fecha_emision DESC, ns.id_salida DESC";
-        return consultarNotas(sql);
-    }
-
-    public Optional<NotaSalida> buscarPorId(int idSalida) throws SQLException {
-        String sql = SELECT_NOTA_CON_CLIENTE + " WHERE ns.id_salida = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idSalida);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearNotaSalida(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     public Optional<NotaSalida> buscarPorNumeroFactura(String numeroFactura) throws SQLException {
-        String sql = SELECT_NOTA_CON_CLIENTE + " WHERE ns.numero_factura = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, numeroFactura);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearNotaSalida(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
+        return consultarNota("""
+                WHERE ns.numero_factura = ?
+                """, statement -> statement.setString(1, numeroFactura));
     }
 
     public List<NotaSalida> listarPorPeriodo(LocalDate desde, LocalDate hasta) throws SQLException {
-        String sql = SELECT_NOTA_CON_CLIENTE
-                + """
-                  WHERE ns.fecha_emision BETWEEN ? AND ?
-                  ORDER BY ns.fecha_emision DESC, ns.id_salida DESC
-                  """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        return consultarNotas("""
+                WHERE ns.fecha_emision BETWEEN ? AND ?
+                ORDER BY ns.fecha_emision DESC, ns.id_salida DESC
+                """, statement -> {
             statement.setDate(1, Date.valueOf(desde));
             statement.setDate(2, Date.valueOf(hasta));
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<NotaSalida> notas = new ArrayList<>();
-                while (resultSet.next()) {
-                    notas.add(mapearNotaSalida(resultSet));
-                }
-                return notas;
-            }
-        }
-    }
-
-    public List<DetalleSalida> listarDetallesPorSalida(int idSalida) throws SQLException {
-        String sql = """
-                SELECT ds.id_detalle_salida, ds.cantidad, ds.precio_unitario, ds.subtotal,
-                       ds.costo_unitario_fifo, ds.costo_total_fifo, ds.utilidad,
-                       p.id_producto, p.nombre AS producto_nombre, p.sku, p.codigo_barras,
-                       l.id_lote, l.codigo_lote
-                FROM detalle_salida ds
-                JOIN producto p ON p.id_producto = ds.id_producto
-                LEFT JOIN lote l ON l.id_lote = ds.id_lote
-                WHERE ds.id_salida = ?
-                ORDER BY ds.id_detalle_salida
-                """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idSalida);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<DetalleSalida> detalles = new ArrayList<>();
-                while (resultSet.next()) {
-                    detalles.add(mapearDetalleSalida(resultSet, idSalida));
-                }
-                return detalles;
-            }
-        }
-    }
-
-    public boolean actualizarEstado(int idSalida, String estado) throws SQLException {
-        String sql = "UPDATE nota_salida SET estado = ? WHERE id_salida = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, estado);
-            statement.setInt(2, idSalida);
-            return statement.executeUpdate() > 0;
-        }
+        });
     }
 
     public boolean actualizarTotales(Connection connection, NotaSalida notaSalida) throws SQLException {
@@ -194,7 +112,7 @@ public class NotaSalidaDAO {
                 WHERE id_salida = ?
                 """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        return ejecutarActualizacion(connection, sql, statement -> {
             statement.setBigDecimal(1, notaSalida.getSubtotal());
             statement.setBigDecimal(2, notaSalida.getIva());
             statement.setBigDecimal(3, notaSalida.getTotal());
@@ -202,8 +120,7 @@ public class NotaSalidaDAO {
             statement.setBigDecimal(5, notaSalida.getUtilidad());
             statement.setString(6, notaSalida.getEstado());
             statement.setInt(7, notaSalida.getIdSalida());
-            return statement.executeUpdate() > 0;
-        }
+        });
     }
 
     public List<Object[]> listarTopProductosVendidos(int limite) throws SQLException {
@@ -216,7 +133,7 @@ public class NotaSalidaDAO {
                 LIMIT ?
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, limite);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -241,7 +158,7 @@ public class NotaSalidaDAO {
                 ORDER BY fecha_dia
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, dias);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -257,16 +174,14 @@ public class NotaSalidaDAO {
         }
     }
 
-    private List<NotaSalida> consultarNotas(String sql) throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            List<NotaSalida> notas = new ArrayList<>();
-            while (resultSet.next()) {
-                notas.add(mapearNotaSalida(resultSet));
-            }
-            return notas;
-        }
+    private List<NotaSalida> consultarNotas(String complementoSql, StatementConfigurer configurador)
+            throws SQLException {
+        return consultarLista(SELECT_NOTA_CON_CLIENTE + complementoSql, configurador, this::mapearNotaSalida);
+    }
+
+    private Optional<NotaSalida> consultarNota(String complementoSql, StatementConfigurer configurador)
+            throws SQLException {
+        return consultarUno(SELECT_NOTA_CON_CLIENTE + complementoSql, configurador, this::mapearNotaSalida);
     }
 
     private NotaSalida mapearNotaSalida(ResultSet resultSet) throws SQLException {
@@ -291,45 +206,5 @@ public class NotaSalidaDAO {
                 resultSet.getBigDecimal("utilidad"),
                 resultSet.getString("estado"),
                 resultSet.getString("observaciones"));
-    }
-
-    private DetalleSalida mapearDetalleSalida(ResultSet resultSet, int idSalida) throws SQLException {
-        NotaSalida notaSalida = new NotaSalida();
-        notaSalida.setIdSalida(idSalida);
-
-        Producto producto = new Producto();
-        producto.setIdProducto(resultSet.getInt("id_producto"));
-        producto.setNombre(resultSet.getString("producto_nombre"));
-        producto.setSku(resultSet.getString("sku"));
-        producto.setCodigoBarras(resultSet.getString("codigo_barras"));
-
-        Lote lote = null;
-        int idLote = resultSet.getInt("id_lote");
-        if (!resultSet.wasNull()) {
-            lote = new Lote();
-            lote.setIdLote(idLote);
-            lote.setCodigoLote(resultSet.getString("codigo_lote"));
-        }
-
-        return new DetalleSalida(
-                resultSet.getInt("id_detalle_salida"),
-                notaSalida,
-                producto,
-                lote,
-                resultSet.getBigDecimal("cantidad"),
-                resultSet.getBigDecimal("precio_unitario"),
-                resultSet.getBigDecimal("subtotal"),
-                resultSet.getBigDecimal("costo_unitario_fifo"),
-                resultSet.getBigDecimal("costo_total_fifo"),
-                resultSet.getBigDecimal("utilidad"));
-    }
-
-    private int leerIdGenerado(PreparedStatement statement) throws SQLException {
-        try (ResultSet keys = statement.getGeneratedKeys()) {
-            if (keys.next()) {
-                return keys.getInt(1);
-            }
-        }
-        throw new SQLException("No se pudo obtener el ID generado para la nota de salida.");
     }
 }

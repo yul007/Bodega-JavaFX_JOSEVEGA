@@ -7,18 +7,15 @@ import com.bodega.model.Proveedor;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import com.bodega.util.ValidationUtils;
 
 /** DAO para lotes de compra y consultas FIFO. */
-public class LoteDAO {
+public class LoteDAO extends JdbcDaoSupport {
 
     private static final String SELECT_LOTE_RELACIONADO = """
             SELECT l.id_lote, l.codigo_lote, l.cantidad, l.cantidad_disponible,
@@ -37,13 +34,9 @@ public class LoteDAO {
             JOIN proveedor pr ON pr.id_proveedor = l.id_proveedor
             """;
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "holacomo";
-
     public int crear(Lote lote) throws SQLException {
         validarLote(lote);
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = abrirConexion()) {
             return crear(connection, lote);
         }
     }
@@ -61,84 +54,29 @@ public class LoteDAO {
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             prepararInsertUpdate(statement, lote);
             statement.executeUpdate();
-            return leerIdGenerado(statement);
+            return leerIdGenerado(statement, "No se pudo obtener el ID generado para el lote.");
         }
     }
 
     public List<Lote> listarTodos() throws SQLException {
-        String sql = SELECT_LOTE_RELACIONADO + " ORDER BY l.fecha_ingreso DESC, l.id_lote DESC";
-        return consultarLista(sql);
-    }
-
-    public Optional<Lote> buscarPorId(int idLote) throws SQLException {
-        String sql = SELECT_LOTE_RELACIONADO + " WHERE l.id_lote = ?";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idLote);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearLote(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public List<Lote> listarPorProducto(int idProducto) throws SQLException {
-        String sql = SELECT_LOTE_RELACIONADO
-                + " WHERE l.id_producto = ? ORDER BY l.fecha_ingreso, l.id_lote";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<Lote> lotes = new ArrayList<>();
-                while (resultSet.next()) {
-                    lotes.add(mapearLote(resultSet));
-                }
-                return lotes;
-            }
-        }
+        return consultarLotes(" ORDER BY l.fecha_ingreso DESC, l.id_lote DESC");
     }
 
     public List<Lote> listarPorProveedor(int idProveedor) throws SQLException {
-        String sql = SELECT_LOTE_RELACIONADO
-                + " WHERE l.id_proveedor = ? ORDER BY l.fecha_ingreso DESC, l.id_lote DESC";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProveedor);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<Lote> lotes = new ArrayList<>();
-                while (resultSet.next()) {
-                    lotes.add(mapearLote(resultSet));
-                }
-                return lotes;
-            }
-        }
+        return consultarLotes(" WHERE l.id_proveedor = ? ORDER BY l.fecha_ingreso DESC, l.id_lote DESC",
+                statement -> statement.setInt(1, idProveedor));
     }
 
     public List<Lote> listarDisponiblesFIFO(Connection connection, int idProducto) throws SQLException {
-        String sql = SELECT_LOTE_RELACIONADO
+        return consultarLotes(connection, SELECT_LOTE_RELACIONADO
                 + """
                   WHERE l.id_producto = ?
                     AND l.cantidad_disponible > 0
                     AND l.activo = TRUE
                   ORDER BY l.fecha_ingreso ASC, l.id_lote ASC
                   FOR UPDATE
-                  """;
-
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<Lote> lotes = new ArrayList<>();
-                while (resultSet.next()) {
-                    lotes.add(mapearLote(resultSet));
-                }
-                return lotes;
-            }
-        }
+                  """,
+                statement -> statement.setInt(1, idProducto));
     }
 
     public boolean actualizar(Lote lote) throws SQLException {
@@ -151,7 +89,7 @@ public class LoteDAO {
                 WHERE id_lote = ?
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             prepararInsertUpdate(statement, lote);
             statement.setInt(11, lote.getIdLote());
@@ -163,21 +101,16 @@ public class LoteDAO {
             BigDecimal cantidadDisponible) throws SQLException {
         String sql = "UPDATE lote SET cantidad_disponible = ? WHERE id_lote = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        return ejecutarActualizacion(connection, sql, statement -> {
             statement.setBigDecimal(1, cantidadDisponible);
             statement.setInt(2, idLote);
-            return statement.executeUpdate() > 0;
-        }
+        });
     }
 
     public boolean inactivar(int idLote) throws SQLException {
         String sql = "UPDATE lote SET activo = FALSE WHERE id_lote = ?";
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idLote);
-            return statement.executeUpdate() > 0;
-        }
+        return ejecutarActualizacion(sql, statement -> statement.setInt(1, idLote));
     }
 
     private void prepararInsertUpdate(PreparedStatement statement, Lote lote) throws SQLException {
@@ -211,16 +144,17 @@ public class LoteDAO {
         }
     }
 
-    private List<Lote> consultarLista(String sql) throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            List<Lote> lotes = new ArrayList<>();
-            while (resultSet.next()) {
-                lotes.add(mapearLote(resultSet));
-            }
-            return lotes;
-        }
+    private List<Lote> consultarLotes(String complementoSql) throws SQLException {
+        return consultarLista(SELECT_LOTE_RELACIONADO + complementoSql, null, this::mapearLote);
+    }
+
+    private List<Lote> consultarLotes(String complementoSql, StatementConfigurer configurador) throws SQLException {
+        return consultarLista(SELECT_LOTE_RELACIONADO + complementoSql, configurador, this::mapearLote);
+    }
+
+    private List<Lote> consultarLotes(Connection connection, String sql, StatementConfigurer configurador)
+            throws SQLException {
+        return consultarLista(connection, sql, configurador, this::mapearLote);
     }
 
     private Lote mapearLote(ResultSet resultSet) throws SQLException {
@@ -263,14 +197,5 @@ public class LoteDAO {
                 resultSet.getDate("fecha_ingreso").toLocalDate(),
                 resultSet.getString("factura_referencia"),
                 resultSet.getBoolean("activo"));
-    }
-
-    private int leerIdGenerado(PreparedStatement statement) throws SQLException {
-        try (ResultSet keys = statement.getGeneratedKeys()) {
-            if (keys.next()) {
-                return keys.getInt(1);
-            }
-        }
-        throw new SQLException("No se pudo obtener el ID generado para el lote.");
     }
 }

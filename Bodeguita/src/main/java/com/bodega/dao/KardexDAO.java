@@ -7,7 +7,6 @@ import com.bodega.model.NotaSalida;
 import com.bodega.model.Producto;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,12 +15,11 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /** DAO para movimientos de Kardex valorado y consultas de inventario. */
-public class KardexDAO {
+public class KardexDAO extends JdbcDaoSupport {
 
     private static final String SELECT_KARDEX_RELACIONADO = """
             SELECT mk.id_movimiento, mk.id_producto, mk.id_lote, mk.id_salida, mk.fecha,
@@ -42,12 +40,8 @@ public class KardexDAO {
             LEFT JOIN nota_salida ns ON ns.id_salida = mk.id_salida
             """;
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "holacomo";
-
     public int crear(MovimientoKardex movimiento) throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection connection = abrirConexion()) {
             return crear(connection, movimiento);
         }
     }
@@ -80,61 +74,26 @@ public class KardexDAO {
             statement.setBigDecimal(14, movimiento.getSaldoValor());
             statement.setString(15, movimiento.getObservacion());
             statement.executeUpdate();
-            return leerIdGenerado(statement);
+            return leerIdGenerado(statement, "No se pudo obtener el ID generado para el movimiento Kardex.");
         }
     }
 
     public List<MovimientoKardex> listarPorProducto(int idProducto) throws SQLException {
-        String sql = SELECT_KARDEX_RELACIONADO
-                + " WHERE mk.id_producto = ? ORDER BY mk.fecha, mk.id_movimiento";
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return mapearLista(resultSet);
-            }
-        }
+        return consultarMovimientos(" WHERE mk.id_producto = ? ORDER BY mk.fecha, mk.id_movimiento",
+                statement -> statement.setInt(1, idProducto));
     }
 
     public List<MovimientoKardex> listarPorProductoYFechas(int idProducto,
             LocalDate desde, LocalDate hasta) throws SQLException {
-        String sql = SELECT_KARDEX_RELACIONADO
-                + """
-                  WHERE mk.id_producto = ?
-                    AND DATE(mk.fecha) BETWEEN ? AND ?
-                  ORDER BY mk.fecha, mk.id_movimiento
-                  """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+        return consultarMovimientos("""
+                WHERE mk.id_producto = ?
+                  AND DATE(mk.fecha) BETWEEN ? AND ?
+                ORDER BY mk.fecha, mk.id_movimiento
+                """, statement -> {
             statement.setInt(1, idProducto);
             statement.setDate(2, java.sql.Date.valueOf(desde));
             statement.setDate(3, java.sql.Date.valueOf(hasta));
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return mapearLista(resultSet);
-            }
-        }
-    }
-
-    public Optional<MovimientoKardex> obtenerUltimoMovimiento(int idProducto) throws SQLException {
-        String sql = SELECT_KARDEX_RELACIONADO
-                + """
-                  WHERE mk.id_producto = ?
-                  ORDER BY mk.fecha DESC, mk.id_movimiento DESC
-                  LIMIT 1
-                  """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return Optional.of(mapearMovimiento(resultSet));
-                }
-            }
-        }
-        return Optional.empty();
+        });
     }
 
     public Optional<MovimientoKardex> obtenerUltimoMovimiento(Connection connection, int idProducto) throws SQLException {
@@ -147,19 +106,14 @@ public class KardexDAO {
                 FOR UPDATE
                 """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
+        return consultarUno(connection, sql, statement -> statement.setInt(1, idProducto),
+                resultSet -> {
                     MovimientoKardex movimiento = new MovimientoKardex();
                     movimiento.setIdMovimiento(resultSet.getInt("id_movimiento"));
                     movimiento.setSaldoCantidad(resultSet.getBigDecimal("saldo_cantidad"));
                     movimiento.setSaldoValor(resultSet.getBigDecimal("saldo_valor"));
-                    return Optional.of(movimiento);
-                }
-            }
-        }
-        return Optional.empty();
+                    return movimiento;
+                });
     }
 
     public BigDecimal calcularValorInventarioActual() throws SQLException {
@@ -170,7 +124,7 @@ public class KardexDAO {
                   AND cantidad_disponible > 0
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection connection = abrirConexion();
                 PreparedStatement statement = connection.prepareStatement(sql);
                 ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next()) {
@@ -200,41 +154,9 @@ public class KardexDAO {
         return BigDecimal.ZERO;
     }
 
-    public List<Object[]> listarResumenInventarioActual() throws SQLException {
-        String sql = """
-                SELECT p.nombre AS producto_nombre,
-                       COALESCE(SUM(l.cantidad_disponible), 0) AS cantidad_total,
-                       COALESCE(SUM(l.cantidad_disponible * l.costo_unitario), 0) AS valor_total
-                FROM producto p
-                LEFT JOIN lote l ON l.id_producto = p.id_producto
-                                  AND l.activo = TRUE
-                                  AND l.cantidad_disponible > 0
-                WHERE p.activo = TRUE
-                GROUP BY p.id_producto, p.nombre
-                ORDER BY p.nombre
-                """;
-
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            List<Object[]> filas = new ArrayList<>();
-            while (resultSet.next()) {
-                filas.add(new Object[] {
-                        resultSet.getString("producto_nombre"),
-                        resultSet.getBigDecimal("cantidad_total"),
-                        resultSet.getBigDecimal("valor_total")
-                });
-            }
-            return filas;
-        }
-    }
-
-    private List<MovimientoKardex> mapearLista(ResultSet resultSet) throws SQLException {
-        List<MovimientoKardex> movimientos = new ArrayList<>();
-        while (resultSet.next()) {
-            movimientos.add(mapearMovimiento(resultSet));
-        }
-        return movimientos;
+    private List<MovimientoKardex> consultarMovimientos(String complementoSql, StatementConfigurer configurador)
+            throws SQLException {
+        return consultarLista(SELECT_KARDEX_RELACIONADO + complementoSql, configurador, this::mapearMovimiento);
     }
 
     private MovimientoKardex mapearMovimiento(ResultSet resultSet) throws SQLException {
@@ -302,14 +224,5 @@ public class KardexDAO {
     private LocalDateTime toDateTime(LocalDate fecha) {
         LocalDate safeDate = fecha == null ? LocalDate.now() : fecha;
         return safeDate.atStartOfDay();
-    }
-
-    private int leerIdGenerado(PreparedStatement statement) throws SQLException {
-        try (ResultSet keys = statement.getGeneratedKeys()) {
-            if (keys.next()) {
-                return keys.getInt(1);
-            }
-        }
-        throw new SQLException("No se pudo obtener el ID generado para el movimiento Kardex.");
     }
 }

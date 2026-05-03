@@ -27,6 +27,13 @@
     -fx-text-fill: #16324f;
 }
 
+/* Le decimos a JavaFX: "Si este título está dentro del header-bar, usa este color sí o sí" */
+.header-bar .normal-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 100;
+    -fx-text-fill: #e8e8e8; /* Tu color gris claro/blanco */
+}
+
 .header-bar .screen-title {
     -fx-text-fill: white;
 }
@@ -84,12 +91,29 @@
     -fx-border-radius: 10;
 }
 
-.secondary-button {
+/* .secondary-button {
     -fx-background-color: #dbe4ef;
     -fx-text-fill: #16324f;
     -fx-font-weight: 600;
     -fx-background-radius: 10;
     -fx-border-radius: 10;
+}  */
+
+
+.secondary-button {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #e2e8f0);
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-border-width: 1;
+    -fx-text-fill: #16324f;
+    -fx-font-weight: 600;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.05), 4, 0, 0, 2);
+}
+
+.secondary-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #f8fafc, #d3dee8);
+    -fx-cursor: hand;
 }
 
 .danger-button {
@@ -177,9 +201,19 @@
     -fx-background-color: #fbfcfe;
 }
 
+
+/* Fila seleccionada (y seleccionada con el mouse encima) */
 .table-row-cell:filled:selected,
 .table-row-cell:filled:selected:hover {
     -fx-background-color: #d7e9fb;
+    -fx-text-fill: #05407a; 
+    -fx-font-weight: 700; /* Esto le da el grosor de negrita */
+}
+
+/* Aplicar también a las celdas individuales para asegurar que todo cambie */
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #05407a;
+    -fx-font-weight: 700; /* Asegura que el texto interno sea negrita */
 }
 
 .table-row-cell.stock-low-row {

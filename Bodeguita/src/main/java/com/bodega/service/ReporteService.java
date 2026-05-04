@@ -1,9 +1,10 @@
+//yuli
 package com.bodega.service;
 
 import com.bodega.model.Producto;
 import com.bodega.model.Proveedor;
 import javafx.collections.ObservableList;
-
+// Manejo de archivos y fechas
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -46,15 +47,11 @@ public class ReporteService {
         File carpeta = new File(CARPETA_REPORTES);
         if (!carpeta.exists()) {
             carpeta.mkdirs();
-            System.out.println("Directorio de trabajo: " + System.getProperty("user.dir"));
-System.out.println("Ruta completa del reporte: " + new File(ruta).getAbsolutePath());
-        }
+            }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ruta))) {
-            System.out.println("Directorio de trabajo: " + System.getProperty("user.dir"));
-System.out.println("Ruta completa del reporte: " + new File(ruta).getAbsolutePath());
-            writer.write(String.join(",", cabecera) + "\n");
-            for (String[] fila : datos) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(ruta))) { ///crea/modifica File en ruta (ruta) que admite texto //buffer envuelve a filewriter memoria temporal
+            writer.write(String.join(",", cabecera) + "\n"); //Concatena todos los elementos del arreglo cabecera usando el separador ","
+            for (String[] fila : datos) { /// Itera sobre cada fila de datos, concatena sus elementos con "," y escribe la línea en el archivo //cada fila es un arreglo de string
                 writer.write(String.join(",", fila) + "\n");
             }
         }
@@ -76,13 +73,13 @@ System.out.println("Ruta completa del reporte: " + new File(ruta).getAbsolutePat
 
     private static String sanitizar(String texto) {
         return texto == null ? "sin_nombre" : texto.trim()
-                .toLowerCase()
-                .replaceAll("[^a-z0-9]+", "_")
-                .replaceAll("_+", "_")
-                .replaceAll("^_|_$", "");
+                .toLowerCase() 
+                .replaceAll("[^a-z0-9]+", "_")     //Todo lo que no sea letra (a-z) ni número (0-9) se reemplaza por _
+                .replaceAll("_+", "_")             //Múltiples _ seguidos se reducen a uno solo.
+                .replaceAll("^_|_$", "");          //Elimina _ al inicio (^_) o al final (_$)
     }
 
-    private static String safe(String[] fila, int index) {
-        return fila.length > index && fila[index] != null ? fila[index] : "";
-    }
+    // private static String safe(String[] fila, int index) {
+    //     return fila.length > index && fila[index] != null ? fila[index] : "";
+    // }
 }

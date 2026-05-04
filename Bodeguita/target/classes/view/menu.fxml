@@ -22,12 +22,12 @@
     <center>
         <GridPane alignment="CENTER" hgap="16.0" vgap="16.0">
             <Button onAction="#abrirProductos" styleClass="menu-tile" text="Productos" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <Button onAction="#abrirLotes" styleClass="menu-tile" text="Lotes" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-            <Button onAction="#abrirSalidas" styleClass="menu-tile" text="Salidas" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-            <Button onAction="#abrirClientes" styleClass="menu-tile" text="Clientes" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Button onAction="#abrirReportes" styleClass="menu-tile" text="Reportes" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Button onAction="#abrirProveedores" styleClass="menu-tile" text="Proveedores" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <Button onAction="#abrirDashboard" styleClass="menu-tile" text="Dashboard" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button onAction="#abrirLotes" styleClass="menu-tile" text="Lotes" GridPane.rowIndex="1" />
+            <Button onAction="#abrirSalidas" styleClass="menu-tile" text="Salidas" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button onAction="#abrirClientes" styleClass="menu-tile" text="Clientes" GridPane.columnIndex="2" />
+            <Button onAction="#abrirReportes" styleClass="menu-tile" text="Reportes" GridPane.rowIndex="2" />
+            <Button onAction="#abrirProveedores" styleClass="menu-tile" text="Proveedores" GridPane.columnIndex="1" />
+            <Button onAction="#abrirDashboard" styleClass="menu-tile" text="Dashboard" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          <columnConstraints>
             <ColumnConstraints />
             <ColumnConstraints />

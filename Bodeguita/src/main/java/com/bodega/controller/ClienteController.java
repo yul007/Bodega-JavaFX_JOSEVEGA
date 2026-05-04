@@ -11,15 +11,17 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 /** Controlador de clientes: crear, listar, editar, buscar e inactivar. */
 public class ClienteController {
@@ -133,56 +135,32 @@ public class ClienteController {
     }
 
     private Optional<Cliente> abrirDialogoCliente(Cliente existente) {
-        Dialog<Cliente> dialog = new Dialog<>();
-        dialog.setTitle(existente == null ? "Nuevo cliente" : "Editar cliente");
-        dialog.setHeaderText(existente == null ? "Registrar cliente" : "Actualizar cliente");
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/cliente_form.fxml"));
+            Parent root = loader.load();
 
-        TextField identificacionField = new TextField();
-        TextField nombreField = new TextField();
-        TextField telefonoField = new TextField();
-        TextField emailField = new TextField();
-        TextField direccionField = new TextField();
+            ClienteFormController controller = loader.getController();
+            controller.setCliente(existente);
 
-        if (existente != null) {
-            identificacionField.setText(existente.getIdentificacion());
-            nombreField.setText(existente.getNombre());
-            telefonoField.setText(existente.getTelefono());
-            emailField.setText(existente.getEmail());
-            direccionField.setText(existente.getDireccion());
-        }
-
-        GridPane form = new GridPane();
-        form.setHgap(10);
-        form.setVgap(10);
-        form.setPadding(new Insets(12));
-        form.addRow(0, new Label("Identificacion"), identificacionField);
-        form.addRow(1, new Label("Nombre"), nombreField);
-        form.addRow(2, new Label("Telefono"), telefonoField);
-        form.addRow(3, new Label("Email"), emailField);
-        form.addRow(4, new Label("Direccion"), direccionField);
-        dialog.getDialogPane().setContent(form);
-
-        dialog.setResultConverter(button -> {
-            if (button != ButtonType.OK) {
-                return null;
+            Stage stage = new Stage();
+            stage.setTitle(existente == null ? "Nuevo cliente" : "Editar cliente");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            if (clientesTable.getScene() != null && clientesTable.getScene().getWindow() instanceof Stage owner) {
+                stage.initOwner(owner);
             }
 
-            Cliente cliente = existente == null ? new Cliente() : existente;
-            cliente.setIdentificacion(ValidationUtils.requerido(identificacionField.getText(), "identificacion"));
-            cliente.setNombre(ValidationUtils.requerido(nombreField.getText(), "nombre"));
-            cliente.setTelefono(ValidationUtils.opcional(telefonoField.getText()));
-            cliente.setEmail(ValidationUtils.opcional(emailField.getText()));
-            cliente.setDireccion(ValidationUtils.opcional(direccionField.getText()));
-            cliente.setActivo(true);
-            validarCliente(cliente);
-            return cliente;
-        });
+            Scene scene = new Scene(root);
+            if (getClass().getResource("/css/styles.css") != null) {
+                scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            }
 
-        try {
-            return dialog.showAndWait();
-        } catch (IllegalArgumentException exception) {
-            mostrarError("Datos invalidos", exception.getMessage());
+            stage.setScene(scene);
+            stage.setResizable(false);
+            controller.setStage(stage);
+            stage.showAndWait();
+            return controller.getResultado();
+        } catch (Exception exception) {
+            mostrarError("No se pudo abrir el formulario de cliente", exception.getMessage());
             return Optional.empty();
         }
     }

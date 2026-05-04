@@ -9,6 +9,7 @@ com/bodega/model/Producto.class
 com/bodega/controller/LoginController.class
 com/bodega/dao/package-info.class
 com/bodega/model/ResultadoFIFO.class
+com/bodega/controller/ClienteFormController.class
 com/bodega/service/KardexService.class
 com/bodega/service/package-info.class
 com/bodega/controller/ReporteController.class

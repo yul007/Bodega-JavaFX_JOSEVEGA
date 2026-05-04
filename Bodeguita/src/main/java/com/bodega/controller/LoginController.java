@@ -40,11 +40,10 @@ public class LoginController {
 
         mostrarAlerta("Credenciales incorrectas", "Usa admin/admin para la demostracion.");
         contrasenaField.clear();
-        contrasenaField.requestFocus();
+        contrasenaField.requestFocus(); // Esto hace que el cursor se coloque automáticamente en el campo de contraseña después de un intento fallido, para que el usuario pueda corregirlo rápidamente sin tener que hacer clic manualmente en el campo.
     }
 
     @FXML private void salir() {
-        //MusicPlayer.detenerMusicaFondo();
         Platform.exit();
     }
 

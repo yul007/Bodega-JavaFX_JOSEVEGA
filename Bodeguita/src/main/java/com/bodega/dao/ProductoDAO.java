@@ -43,7 +43,7 @@ public class ProductoDAO extends JdbcDaoSupport {
         }
     }
 
-    public List<Producto> listarActivos() throws SQLException {
+    public List<Producto> listarActivos() throws SQLException { //se usa para agregar al sql WHERE p.activo = TRUE para mostrar solo los activos
         return consultarProductos(" WHERE p.activo = TRUE ORDER BY p.nombre");
     }
 
@@ -114,7 +114,7 @@ public class ProductoDAO extends JdbcDaoSupport {
         statement.setBoolean(9, producto.isActivo());
     }
 
-    private List<Producto> consultarProductos(String complementoSql) throws SQLException {
+    private List<Producto> consultarProductos(String complementoSql) throws SQLException { //se usa el sql completo 
         return consultarLista(SELECT_PRODUCTO_CON_CATEGORIA + complementoSql, null, this::mapearProducto);
     }
 
@@ -150,7 +150,7 @@ public class ProductoDAO extends JdbcDaoSupport {
                 resultSet.getString("categoria_descripcion"),
                 resultSet.getBoolean("categoria_activo"));
 
-        return new Producto(
+        return new Producto( //devuelve un nuevo objeto Producto construido a partir de los datos obtenidos del ResultSet, incluyendo la categoría asociada
                 resultSet.getInt("id_producto"),
                 categoria,
                 resultSet.getString("sku"),

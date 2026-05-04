@@ -1,5 +1,6 @@
 package com.bodega.dao;
 
+import com.bodega.dao.JdbcDaoSupport.StatementConfigurer;
 import com.bodega.model.Categoria;
 import com.bodega.model.Lote;
 import com.bodega.model.MovimientoKardex;
@@ -78,9 +79,9 @@ public class KardexDAO extends JdbcDaoSupport {
         }
     }
 
-    public List<MovimientoKardex> listarPorProducto(int idProducto) throws SQLException {
+    public List<MovimientoKardex> listarPorProducto(int idProducto) throws SQLException { //esto devuelve una lista de movimientos de kardex para el producto especificado por idProducto, luego convierte cada movimiento en un arreglo de String con los datos relevantes para el reporte, y finalmente recopila todos esos arreglos en una lista que se devuelve como resultado del método.
         return consultarMovimientos(" WHERE mk.id_producto = ? ORDER BY mk.fecha, mk.id_movimiento",
-                statement -> statement.setInt(1, idProducto));
+                statement -> statement.setInt(1, idProducto)); //.setInt hace que el primer parámetro (1) se reemplace por el valor de idProducto en la consulta SQL, lo que permite obtener los movimientos de Kardex relacionados con ese producto específico.
     }
 
     public List<MovimientoKardex> listarPorProductoYFechas(int idProducto,
@@ -166,7 +167,7 @@ public class KardexDAO extends JdbcDaoSupport {
                 resultSet.getString("categoria_descripcion"),
                 resultSet.getBoolean("categoria_activo"));
 
-        Producto producto = new Producto(
+        Producto producto = new Producto( //devuelve un nuevo objeto Producto construido a partir de los datos obtenidos del ResultSet, incluyendo la categoría asociada
                 resultSet.getInt("id_producto"),
                 categoria,
                 resultSet.getString("sku"),

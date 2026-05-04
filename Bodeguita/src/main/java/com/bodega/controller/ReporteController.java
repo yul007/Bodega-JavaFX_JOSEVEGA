@@ -40,16 +40,21 @@ public class ReporteController {
                 "Notas de Salida por Periodo",
                 "Compras por Proveedor",
                 "Productos con Stock Bajo"//,
-                //"Valor Actual de Inventario"
         ));
-
         cargarFiltros();
+    }
+    private void cargarFiltros() {
+        try {
+            comboProducto.setItems(FXCollections.observableArrayList(productoDAO.listarActivos()));
+            comboProveedor.setItems(FXCollections.observableArrayList(proveedorDAO.listarActivos()));
+        } catch (Exception e) {
+            mostrarMensaje("No se pudieron cargar los filtros: " + e.getMessage(), "Error", AlertType.ERROR);
+        }
     }
 
     @FXML public void onExportarCSV() {
         generarReporte("csv");
     }
-
     @FXML public void onExportarTXT() {
         generarReporte("txt");
     }
@@ -92,29 +97,21 @@ public class ReporteController {
         }
     }
 
-    private void cargarFiltros() {
-        try {
-            comboProducto.setItems(FXCollections.observableArrayList(productoDAO.listarActivos()));
-            comboProveedor.setItems(FXCollections.observableArrayList(proveedorDAO.listarActivos()));
-        } catch (Exception e) {
-            mostrarMensaje("No se pudieron cargar los filtros: " + e.getMessage(), "Error", AlertType.ERROR);
-        }
-    }
 
     private List<String[]> construirKardex(int idProducto) throws IOException {
         try {
-                    return kardexDAO.listarPorProducto(idProducto).stream()
-                    .map(movimiento -> new String[] {
-                            String.valueOf(movimiento.getFecha()),
-                            movimiento.getTipo(),
-                            movimiento.getProducto().getNombre(),
-                            valorTexto(positivoO(movimiento.getCantidadEntrada(), movimiento.getCantidadSalida())),
-                            valorTexto(positivoO(movimiento.getCostoUnitarioEntrada(), movimiento.getCostoUnitarioSalida())),
-                            valorTexto(movimiento.getSaldoCantidad()),
-                            valorTexto(movimiento.getSaldoValor()),
-                            movimiento.getReferencia()
+                    return kardexDAO.listarPorProducto(idProducto).stream() ///.listarPorProducto devuelve un List<MovimientoKardex> que pasa a .stream para transf.   //devuelve una lista de movimientos de kardex para el producto especificado por idProducto, luego convierte cada movimiento en un arreglo de String con los datos relevantes para el reporte, y finalmente recopila todos esos arreglos en una lista que se devuelve como resultado del método.
+                    .map(movimiento -> new String[] { //moviemiento es cada elemento del stream, se mapea a un arreglo de String con los datos relevantes para el reporte
+                            String.valueOf(movimiento.getFecha()), // String.valueOf convierte la fecha a texto
+                            movimiento.getTipo(),                  // tipo de movimiento (entrada/salida)
+                            movimiento.getProducto().getNombre(),  // nombre del producto
+                            valorTexto(positivoO(movimiento.getCantidadEntrada(), movimiento.getCantidadSalida())),           // devuelve en string la cantidad de movimiento de entrada y salida
+                            valorTexto(positivoO(movimiento.getCostoUnitarioEntrada(), movimiento.getCostoUnitarioSalida())), // devuelve en string el CostoUnitarioEntrada y CostoUnitarioSalida
+                            valorTexto(movimiento.getSaldoCantidad()), // devuelve en string el saldo de cantidad dopo movimiento
+                            valorTexto(movimiento.getSaldoValor()),    // devuelve en string el saldo de valor dopo movimiento
+                            movimiento.getReferencia() // devuelve str numero de referencia (factura)
                     })
-                    .toList();
+                    .toList(); //.toList() recopila todos los arreglos de String generados por el map en una lista que se devuelve como resultado del método.
         } catch (Exception e) {
             throw new IOException("No se pudo construir el Kardex: " + e.getMessage(), e);
         }
@@ -166,17 +163,18 @@ public class ReporteController {
         }
     }
 
-    private String valorTexto(BigDecimal valor) {
+    private String valorTexto(BigDecimal valor) { //Convierte un valor numérico a texto con formato de dos decimales, o devuelve "0.00" si el valor es nulo.
         return valor == null ? "0.00" : valor.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
     }
 
-    private BigDecimal positivoO(BigDecimal primero, BigDecimal segundo) {
+    private BigDecimal positivoO(BigDecimal primero, BigDecimal segundo) { //Devuelve el primer valor si es positivo, de lo contrario devuelve el segundo valor o cero si el segundo también es nulo o negativo. Esto se usa para mostrar solo cantidades y costos positivos en el reporte de Kardex, ya que un movimiento de entrada tendrá valores en cantidadEntrada y costoUnitarioEntrada, mientras que un movimiento de salida tendrá valores en cantidadSalida y costoUnitarioSalida.
         if (primero != null && primero.compareTo(BigDecimal.ZERO) > 0) {
             return primero;
         }
         return segundo == null ? BigDecimal.ZERO : segundo;
     }
-
+    
+//------------------------------
     private void mostrarMensaje(String mensaje, String titulo, AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);

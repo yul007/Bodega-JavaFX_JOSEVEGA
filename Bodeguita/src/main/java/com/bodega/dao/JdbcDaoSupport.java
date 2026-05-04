@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.bodega.dao.JdbcDaoSupport.StatementConfigurer;
+
 abstract class JdbcDaoSupport {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/bodega_db";
@@ -29,15 +31,14 @@ abstract class JdbcDaoSupport {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 
-    protected <T> List<T> consultarLista(String sql, StatementConfigurer configurador,
-            RowMapper<T> mapeador) throws SQLException {
+    protected <T> List<T> consultarLista(String sql, StatementConfigurer configurador, RowMapper<T> mapeador) throws SQLException {
         try (Connection connection = abrirConexion();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            if (configurador != null) {
-                configurador.configurar(statement);
+                PreparedStatement statement = connection.prepareStatement(sql)) {       // prepara la consulta SQL para su ejecución, permitiendo agregar parámetros de forma segura
+            if (configurador != null) {     //null
+                configurador.configurar(statement);     // esto permite configurar el statement antes de ejecutarlo, por ejemplo para agregar parámetros
             }
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return mapearLista(resultSet, mapeador);
+            try (ResultSet resultSet = statement.executeQuery()) {      // ejecuta la consulta SQL y devuelve un ResultSet que contiene los resultados de la consulta
+                return mapearLista(resultSet, mapeador);    // toma el resultset y 
             }
         }
     }
@@ -116,10 +117,10 @@ abstract class JdbcDaoSupport {
     }
 
     private <T> List<T> mapearLista(ResultSet resultSet, RowMapper<T> mapeador) throws SQLException {
-        List<T> valores = new ArrayList<>();
+        List<T> valores = new ArrayList<>(); //crea una lista vacía para almacenar los objetos mapeados
         while (resultSet.next()) {
-            valores.add(mapeador.mapear(resultSet));
-        }
+            valores.add(mapeador.mapear(resultSet)); /// .mapear hace el mapeo de cada fila del ResultSet a un objeto del tipo T utilizando el RowMapper proporcionado, y luego agrega ese objeto a la lista de valores
+        }//mapeador es una instancia de RowMapper<T>    // mapeador.mapear()== mapearProducto()
         return valores;
     }
 }

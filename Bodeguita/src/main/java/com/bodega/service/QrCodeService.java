@@ -1,4 +1,4 @@
-//yuli
+//yuli Y JAAN ya me aprendi este pero tu debes saber lo basico porque esta en el controlador Producto
 package com.bodega.service;
 
 import com.bodega.model.Producto;

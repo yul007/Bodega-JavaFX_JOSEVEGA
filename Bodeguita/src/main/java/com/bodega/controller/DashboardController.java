@@ -1,3 +1,4 @@
+//YULI y JAAN este tampoco es tan importante
 package com.bodega.controller;
 
 import com.bodega.dao.KardexDAO;

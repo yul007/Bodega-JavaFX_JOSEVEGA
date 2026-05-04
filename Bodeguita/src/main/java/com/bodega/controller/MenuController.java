@@ -32,6 +32,9 @@ public class MenuController {
     @FXML private void abrirClientes() { navegarA("/view/clientes.fxml", "Clientes");
     }
 
+    @FXML private void abrirProveedores() { navegarA("/view/proveedores.fxml", "Proveedores");
+    }
+
     @FXML private void abrirReportes() { navegarA("/view/reportes.fxml", "Reportes");
     }
 

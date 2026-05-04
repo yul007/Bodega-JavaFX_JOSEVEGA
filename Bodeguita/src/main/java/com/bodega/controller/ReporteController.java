@@ -43,14 +43,7 @@ public class ReporteController {
         ));
         cargarFiltros();
     }
-    private void cargarFiltros() {
-        try {
-            comboProducto.setItems(FXCollections.observableArrayList(productoDAO.listarActivos()));
-            comboProveedor.setItems(FXCollections.observableArrayList(proveedorDAO.listarActivos()));
-        } catch (Exception e) {
-            mostrarMensaje("No se pudieron cargar los filtros: " + e.getMessage(), "Error", AlertType.ERROR);
-        }
-    }
+
 
     @FXML public void onExportarCSV() {
         generarReporte("csv");
@@ -174,11 +167,20 @@ public class ReporteController {
         return segundo == null ? BigDecimal.ZERO : segundo;
     }
     
-//------------------------------
+//------------------------------UTILICADES PARA MOSTRAR MENSAJES---------------------------------
     private void mostrarMensaje(String mensaje, String titulo, AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void cargarFiltros() {
+        try {
+            comboProducto.setItems(FXCollections.observableArrayList(productoDAO.listarActivos()));
+            comboProveedor.setItems(FXCollections.observableArrayList(proveedorDAO.listarActivos()));
+        } catch (Exception e) {
+            mostrarMensaje("No se pudieron cargar los filtros: " + e.getMessage(), "Error", AlertType.ERROR);
+        }
     }
 }

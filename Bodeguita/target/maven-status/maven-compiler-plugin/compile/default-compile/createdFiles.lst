@@ -1,4 +1,5 @@
 com/bodega/controller/CategoriaController.class
+com/bodega/controller/ProveedorFormController.class
 com/bodega/controller/DashboardController.class
 com/bodega/service/QrCodeService.class
 com/bodega/model/KardexRegistro.class

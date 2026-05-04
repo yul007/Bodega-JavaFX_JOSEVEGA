@@ -8,12 +8,12 @@ import java.net.URL;
 public class MusicPlayer {
 
     private static final String DEFAULT_BACKGROUND_MUSIC = "/music/musicaFondo.mp3";
-    private static MusicPlayer backgroundMusicPlayer;
+    private static MusicPlayer backgroundMusicPlayer;     /// Instancia única para el reproductor de fondo (Singleton)    // solo existe un objeto MusicPlayer para toda la aplicación que maneja la música ambiental.
 
-    private final MediaPlayer mediaPlayer;
+    private final MediaPlayer mediaPlayer;     /// Reproductor de JavaFX que maneja la reproducción real // MediaPlayer es la clase de JavaFX que realmente reproduce el audio (controla la reproducción, volumen, pausa, etc// stop, play, resume, pause etc
 
     public MusicPlayer(String resourcePath, boolean loop) {
-        this.mediaPlayer = crearMediaPlayer(resourcePath);
+        this.mediaPlayer = crearMediaPlayer(resourcePath); // Carga el audio desde resources
         if (mediaPlayer != null) {
             mediaPlayer.setVolume(0.8);
             mediaPlayer.setCycleCount(loop ? MediaPlayer.INDEFINITE : 1);
@@ -25,7 +25,7 @@ public class MusicPlayer {
     public static synchronized void reproducirMusicaFondo() {
         if (backgroundMusicPlayer == null)
             backgroundMusicPlayer = new MusicPlayer(DEFAULT_BACKGROUND_MUSIC, true);
-        backgroundMusicPlayer.play();
+        backgroundMusicPlayer.play(); // es lo mismo que decir backgroundMusicPlayer.mediaPlayer.play();
     }
 
     public static synchronized void pausarMusicaFondo() {
@@ -66,20 +66,26 @@ public class MusicPlayer {
 
     // ── Interno ─────────────────────────────────────────────────────────────
 
-    private MediaPlayer crearMediaPlayer(String resourcePath) {
+    private MediaPlayer crearMediaPlayer(String resourcePath) { //guarda en el MediaPlayer el archivo que se va a reproducir
         if (resourcePath == null || resourcePath.isBlank())
             throw new IllegalArgumentException("La ruta del audio es obligatoria.");
         try {
-            String ruta = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
-            URL resource = MusicPlayer.class.getResource(ruta);
+            String ruta = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath; // Asegura que la ruta comience con "/"
+            URL resource = MusicPlayer.class.getResource(ruta); // Busca el recurso en el classpath (resources)
             if (resource == null) {
                 System.err.println("No se encontró el recurso: " + ruta);
                 return null;
             }
-            return new MediaPlayer(new Media(resource.toExternalForm()));
+            return new MediaPlayer(new Media(resource.toExternalForm())); // Carga el audio desde resources
         } catch (Exception e) {
             System.err.println("Error al cargar el audio " + resourcePath + ": " + e.getMessage());
             return null;
         }
     }
+
+    public MediaPlayer getMediaPlayer() {
+    return mediaPlayer;
 }
+}
+
+

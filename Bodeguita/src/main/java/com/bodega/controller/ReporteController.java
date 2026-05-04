@@ -1,3 +1,4 @@
+//yuli
 package com.bodega.controller;
 
 import com.bodega.dao.KardexDAO;
@@ -52,6 +53,19 @@ public class ReporteController {
         generarReporte("txt");
     }
 
+    @FXML public void onExportarKardex() {
+        Producto producto = comboProducto.getValue();
+        try {
+            if (producto == null) {
+                throw new IllegalArgumentException("Debe seleccionar un producto para exportar el Kardex.");
+            }
+            ReporteService.generarReporteKardexPorProducto(producto, construirKardex(producto.getIdProducto()));
+            mostrarMensaje("Reporte Kardex generado exitosamente.", "Éxito", AlertType.INFORMATION);
+        } catch (IllegalArgumentException | IOException e) {
+            mostrarMensaje(e.getMessage(), "Error", AlertType.ERROR);
+        }
+    }
+
     private void generarReporte(String formato) {
         String tipo = comboTipoReporte.getValue();
         try {
@@ -93,8 +107,8 @@ public class ReporteController {
 
     private List<String[]> construirKardex(int idProducto) throws IOException {
         try {
-                    return kardexDAO.listarPorProducto(idProducto).stream() ///.listarPorProducto devuelve un List<MovimientoKardex> que pasa a .stream para transf.   //devuelve una lista de movimientos de kardex para el producto especificado por idProducto, luego convierte cada movimiento en un arreglo de String con los datos relevantes para el reporte, y finalmente recopila todos esos arreglos en una lista que se devuelve como resultado del método.
-                    .map(movimiento -> new String[] { //moviemiento es cada elemento del stream, se mapea a un arreglo de String con los datos relevantes para el reporte
+                    return kardexDAO.listarPorProducto(idProducto).stream()
+                    .map(movimiento -> new String[] {
                             String.valueOf(movimiento.getFecha()), // String.valueOf convierte la fecha a texto
                             movimiento.getTipo(),                  // tipo de movimiento (entrada/salida)
                             movimiento.getProducto().getNombre(),  // nombre del producto
@@ -104,7 +118,7 @@ public class ReporteController {
                             valorTexto(movimiento.getSaldoValor()),    // devuelve en string el saldo de valor dopo movimiento
                             movimiento.getReferencia() // devuelve str numero de referencia (factura)
                     })
-                    .toList(); //.toList() recopila todos los arreglos de String generados por el map en una lista que se devuelve como resultado del método.
+                    .toList();
         } catch (Exception e) {
             throw new IOException("No se pudo construir el Kardex: " + e.getMessage(), e);
         }

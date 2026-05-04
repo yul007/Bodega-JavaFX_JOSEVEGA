@@ -1,5 +1,4 @@
 com/bodega/controller/ProductoFormController.class
-com/bodega/controller/CategoriaController.class
 com/bodega/controller/ProveedorFormController.class
 com/bodega/controller/DashboardController.class
 com/bodega/service/QrCodeService.class
@@ -43,7 +42,6 @@ com/bodega/db/package-info.class
 com/bodega/model/DetalleFIFO.class
 com/bodega/model/NotaSalida.class
 com/bodega/model/Categoria.class
-com/bodega/controller/KardexController.class
 com/bodega/controller/LoteController.class
 com/bodega/dao/JdbcDaoSupport$StatementConfigurer.class
 com/bodega/controller/package-info.class

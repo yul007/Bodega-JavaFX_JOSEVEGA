@@ -26,9 +26,6 @@ public class MenuController {
     @FXML private void abrirSalidas() { navegarA("/view/salidas.fxml", "Salidas");
     }
 
-    @FXML private void abrirKardex() { navegarA("/view/kardex.fxml", "Kardex");
-    }
-
     @FXML private void abrirClientes() { navegarA("/view/clientes.fxml", "Clientes");
     }
 

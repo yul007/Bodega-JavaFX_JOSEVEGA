@@ -40,6 +40,7 @@
             <HBox spacing="16.0" styleClass="module-card">
                 <Button fx:id="btnExportarCSV" onAction="#onExportarCSV" styleClass="primary-button" text="Exportar CSV" />
                 <Button fx:id="btnExportarTXT" onAction="#onExportarTXT" styleClass="secondary-button" text="Exportar TXT" />
+                <Button fx:id="btnExportarKardex" onAction="#onExportarKardex" styleClass="primary-button" text="Exportar Kardex" />
             </HBox>
         </VBox>
     </center>

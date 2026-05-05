@@ -46,13 +46,13 @@ public class ProductoController {
 
     @FXML
     private void initialize() {
-        configurarTabla();
-        configurarSeleccionQr();
-        cargarProductos();
+        configurarTabla();       // 
+        configurarSeleccionQr(); //se inizializa listener de QR
+        cargarProductos();       //OBTENER LOS PRODUCTOS DESDE LA BASE DE DATOS Y MOSTRARLOS EN LA TABLA 
     }
 
     @FXML
-    private void nuevoProducto() {
+    private void nuevoProducto() { // se abre el formulario y se lanza mensaje
         abrirFormularioProducto(null).ifPresent(producto -> {
             try {
                 productoDAO.crear(producto);
@@ -65,7 +65,7 @@ public class ProductoController {
     }
 
     @FXML
-    private void buscarProducto() {
+    private void buscarProducto() { //
         String texto = buscadorField.getText() == null ? "" : buscadorField.getText().trim();
         try {
             List<Producto> resultado = texto.isEmpty()
@@ -134,29 +134,25 @@ public class ProductoController {
         }
     }
 
-    private void configurarTabla() {
-        idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto()));
+    private void configurarTabla() { // AQUI SE CONFIGURAN LAS COLUMNAS DE LA TABLA PARA MOSTRAR LOS DATOS CORRESPONDIENTES DE CADA PRODUCTO, SE ASIGNAN LOS VALORES DE CADA COLUMNA USANDO EXPRESIONES LAMBDA, Y SE CONFIGURA UNA FABRICA DE FILAS PARA APLICAR ESTILOS VISUALES SEGUN EL STOCK ACTUAL EN COMPARACION CON EL STOCK MINIMO.
+                                     //, data.getValue() obtiene el producto de esa fila.
+        idColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getIdProducto())); // new SimpleObjectProperty o SimpleStringProperty envuelven el valor para que la tabla pueda observarlo y actualizarlo automáticamente
         nombreColumn.setCellValueFactory(data -> new SimpleStringProperty(valorSeguro(data.getValue().getNombre())));
-        categoriaColumn.setCellValueFactory(data -> {
-            String nombreCategoria = data.getValue().getCategoria() == null
-                    ? ""
-                    : valorSeguro(data.getValue().getCategoria().getNombre());
-            return new SimpleStringProperty(nombreCategoria);
+        categoriaColumn.setCellValueFactory(data -> { String nombreCategoria = data.getValue().getCategoria() == null ? "" : valorSeguro(data.getValue().getCategoria().getNombre()); return new SimpleStringProperty(nombreCategoria);
         });
         stockColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getStockActual()));
         stockMinimoColumn.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getStockMinimo()));
 
-        productosTable.setItems(productos);
-        productosTable.setRowFactory(table -> new TableRow<>() {
-            @Override
-            protected void updateItem(Producto producto, boolean empty) {
+        productosTable.setItems(productos); //  //productos es un ObservableList<Producto> que contiene todos los productos a mostrar. La tabla se actualizará automáticamente cuando esta lista cambie.
+        productosTable.setRowFactory(table -> new TableRow<>() { //.setRowFactory produce rows personalizables
+            @Override 
+            protected void updateItem(Producto producto, boolean empty) { //se llama automaticamente
                 super.updateItem(producto, empty);
-                getStyleClass().removeAll("stock-low-row", "stock-warning-row");
+                getStyleClass().removeAll("stock-low-row", "stock-warning-row"); //se remueven los estilos para que no se acumulen
                 if (empty || producto == null) {
                     return;
                 }
-
-                int comparacion = valorSeguro(producto.getStockActual()).compareTo(valorSeguro(producto.getStockMinimo()));
+                int comparacion = valorSeguro(producto.getStockActual()).compareTo(valorSeguro(producto.getStockMinimo())); //se validan y comparan Se comparan stockActual y stockMinimo
                 if (comparacion < 0) {
                     getStyleClass().add("stock-low-row");
                 } else if (comparacion == 0) {
@@ -166,17 +162,17 @@ public class ProductoController {
         });
     }
 
-    private void configurarSeleccionQr() {
-        productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> {
-            if (actual == null) {
-                Platform.runLater(() -> qrImageView.setImage(null));
+    private void configurarSeleccionQr() { // AQUI SE CONFIGURA UN LISTENER PARA DETECTAR CUANDO SE SELECCIONA UN PRODUCTO EN LA TABLA, Y SE GENERA UN CODIGO QR PARA EL PRODUCTO SELECCIONADO USANDO EL SERVICIO QrCodeService, MOSTRANDOLO EN EL ImageView CORRESPONDIENTE. SI NO HAY NINGUN PRODUCTO SELECCIONADO, SE LIMPIA LA IMAGEN DEL QR.
+        productosTable.getSelectionModel().selectedItemProperty().addListener((observable, anterior, actual) -> { //.addListenes y observable, anterior, actual son parte de la sintaxis para agregar un listener a una propiedad observable en JavaFX. En este caso, se esta agregando un listener a la propiedad selectedItemProperty() de la tabla productosTable, que representa el producto actualmente seleccionado en la tabla. El listener se ejecuta cada vez que cambia el producto seleccionado, recibiendo como parametros el valor anterior y el valor actual del producto seleccionado.
+            if (actual == null) {                                               //^ OB: Es la propiedad observable que está siendo monitoreada, en este caso es el, AN: Es el valor anterior que tenía la propiedad antes del cambio. Es decir, el producto que estaba seleccionado previamente (puede ser null si no había selección). ACT: Es el valor nuevo después del cambio. Es el obj actual seleccionado 
+                Platform.runLater(() -> qrImageView.setImage(null)); // Si el producto seleccionado es null, se ejecuta en el hilo de la interfaz grafica para limpiar la imagen del QR estableciendo la imagen del ImageView a null. Esto asegura que no se muestre ningun QR cuando no hay un producto seleccionado.
             } else {
-                Platform.runLater(() -> qrCodeService.generarQRCode(actual, qrImageView));
+                Platform.runLater(() -> qrCodeService.generarQRCode(actual, qrImageView)); // Si hay un producto seleccionado, se ejecuta en el hilo de la interfaz grafica para generar un QR para el producto actual usando el servicio qrCodeService, y se muestra en el ImageView qrImageView. Esto permite que cada vez que el usuario seleccione un producto diferente en la tabla, se actualice automaticamente el QR mostrado para reflejar el producto seleccionado.
             }
         });
     }
 
-    private void cargarProductos() {
+    private void cargarProductos() { // AQUI SE CARGAN LOS PRODUCTOS DESDE LA BASE DE DATOS USANDO EL DAO, SE ACTUALIZA LA LISTA OBSERVABLE CON LOS PRODUCTOS OBTENIDOS, Y SI HAY PRODUCTOS EN LA LISTA, SE SELECCIONA EL PRIMERO Y SE GENERA SU QR. SI OCURRE ALGUNA EXCEPCION DURANTE LA CARGA DE LOS PRODUCTOS, SE MUESTRA UN MENSAJE DE ERROR AL USUARIO.
         try {
             productos.setAll(productoDAO.listarActivos());
             if (!productos.isEmpty()) {

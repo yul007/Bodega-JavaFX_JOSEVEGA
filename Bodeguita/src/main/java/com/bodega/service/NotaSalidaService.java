@@ -37,21 +37,21 @@ public class NotaSalidaService {
     }
 
     public NotaSalida crearNotaSalida(NotaSalida notaSalida, List<DetalleSalida> detalles) throws SQLException {
-        validarNotaSalida(notaSalida, detalles);
+        validarNotaSalida(notaSalida, detalles); // AQUI SE VALIDA QUE LA NOTA DE SALIDA Y LOS DETALLES TENGAN LOS DATOS NECESARIOS Y SEAN VALIDOS, SI NO SON VALIDOS SE LANZA UNA EXCEPCION CON UN MENSAJE AMIGABLE PARA EL USUARIO
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            boolean autoCommitOriginal = connection.getAutoCommit();
+            boolean autoCommitOriginal = connection.getAutoCommit(); /// AQUI SE INICIA LA TRANSACCION DESACTIVANDO EL AUTO COMMIT DE LA CONEXION.  El autocommit es una caracteristica de las conexiones JDBC que hace que cada sentencia SQL se ejecute en su propia transaccion. Al desactivarlo, podemos agrupar varias operaciones SQL en una sola transaccion, y asegurarnos de que todas se completen exitosamente o se deshagan en caso de error.
             connection.setAutoCommit(false);
 
             try {
                 NotaSalida notaGuardada = crearNotaSalida(connection, notaSalida, detalles);
-                connection.commit();
-                return notaGuardada;
-            } catch (SQLException | RuntimeException exception) {
-                rollback(connection);
+                connection.commit(); // AQUI SE CONFIRMA LA TRANSACCION SI TODO FUE EXITOSO, LO QUE HACE QUE LOS CAMBIOS SE GUARDEN PERMANENTEMENTE EN LA BASE DE DATOS. SI OCURRE ALGUNA EXCEPCION DURANTE EL PROCESO, SE LANZA LA EXCEPCION Y SE EJECUTA EL BLOQUE CATCH PARA HACER UN ROLLBACK DE LA TRANSACCION, DESHACIENDO TODOS LOS CAMBIOS REALIZADOS HASTA ESE PUNTO.
+                return notaGuardada; // AQUI SE DEVUELVE un tipo NotaSalida que representa la nota de salida guardada en la base de datos, incluyendo el ID generado y los totales calculados.
+            } catch (SQLException | RuntimeException exception) { 
+                rollback(connection); // rollback hace que la base de datos vuelva al estado anterior al inicio de la transaccion, deshaciendo todos los cambios realizados durante la transaccion. Esto es importante para mantener la integridad de los datos en caso de que ocurra un error durante el proceso de creación de la nota de salida.
                 throw exception;
             } finally {
-                connection.setAutoCommit(autoCommitOriginal);
+                connection.setAutoCommit(autoCommitOriginal); // AQUI SE RESTAURA EL VALOR ORIGINAL DEL AUTO COMMIT DE LA CONEXION, YA sea que la transaccion se haya completado exitosamente o se haya producido una excepcion. Esto es importante para no afectar otras operaciones que puedan usar la misma conexion posteriormente, y para asegurar que el comportamiento de la conexion vuelva a la normalidad después de nuestra operacion.
             }
         }
     }

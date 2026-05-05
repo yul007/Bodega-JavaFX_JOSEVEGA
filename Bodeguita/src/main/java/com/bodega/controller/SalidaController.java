@@ -57,25 +57,25 @@ public class SalidaController {
         productos = FXCollections.observableArrayList();
         clientes = FXCollections.observableArrayList();
 
-        colProducto.setCellValueFactory(cellData -> 
-            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getProducto().getNombre()));
+        colProducto.setCellValueFactory(cellData ->  // AQUI SE MUESTRA EL NOMBRE DEL PRODUCTO EN LA TABLA, NO EL OBJETO COMPLETO
+            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getProducto().getNombre())); // getProducto() devuelve el objeto Producto del DetalleSalida, y luego getNombre() obtiene el nombre para mostrarlo en la tabla
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colPrecioUnitario.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
 
-        detalleTable.setItems(detalles);
+        detalleTable.setItems(detalles);  //AQUI SE ASOCIA LA LISTA DE DETALLES CON LA TABLA PARA QUE SE MUESTREN LOS DETALLES AGREGADOS
         
-        cargarProductos();
-        cargarClientes();
+        cargarProductos(); //AQUI SE CARGAN LOS PRODUCTOS ACTIVOS EN EL COMBOBOX
+        cargarClientes(); //AQUI SE CARGAN LOS CLIENTES ACTIVOS EN EL COMBOBOX
         
-        dateFecha.setValue(LocalDate.now());
+        dateFecha.setValue(LocalDate.now()); //AQUI SE INICIALIZA EL DATEPICKER CON LA FECHA ACTUAL PARA QUE EL USUARIO NO TENGA QUE SELECCIONARLA SI ES LA MISMA FECHA DE LA VENTA
         
-        actualizarTotales();
+        actualizarTotales(); //AQUI SE INICIALIZAN LOS LABELS DE SUBTOTAL, IVA Y TOTAL EN 0.00 AL INICIAR LA VENTA, PARA QUE EL USUARIO TENGA UNA REFERENCIA VISUAL DE LOS VALORES DESDE EL PRINCIPIO
     }
     
     private void cargarProductos() {
         try {
-            productos.setAll(productoDAO.listarActivos());
+            productos.setAll(productoDAO.listarActivos());   ///AQUI SE CARGAN LOS PRODUCTOS ACTIVOS EN EL COMBOBOX    //.setAll hace que se reemplacen los datos anteriores por los nuevos, evitando duplicados si se llama varias veces
             comboProducto.setItems(productos);
         } catch (SQLException e) {
             mostrarMensaje("No se pudieron cargar los productos.\n" + mensajeAmigableBD(e),
@@ -102,15 +102,15 @@ public class SalidaController {
     @FXML public void onAgregarDetalle() {
         try {
             Producto producto = comboProducto.getValue();
-            BigDecimal cantidad = parsePositive(txtCantidad.getText(), "cantidad");
+            BigDecimal cantidad = parsePositive(txtCantidad.getText(), "cantidad"); //AQUI SE PARSEA EL TEXTO DE LA CANTIDAD A BIGDECIMAL Y SE VALIDA QUE SEA UN NUMERO POSITIVO, SI NO ES VALIDO SE LANZA UNA
             BigDecimal precioUnitario = parsePositive(txtPrecioUnitario.getText(), "precio unitario");
             BigDecimal subtotal = precioUnitario.multiply(cantidad).setScale(2, RoundingMode.HALF_UP);
 
             if (producto == null) {
                 throw new IllegalArgumentException("Debe seleccionar un producto.");
             }
-            ValidationUtils.requeridoPositivo(cantidad, "cantidad");
-            ValidationUtils.requeridoPositivo(precioUnitario, "precio unitario");
+            ValidationUtils.requeridoPositivo(cantidad, "cantidad"); //AQUI SE VALIDA QUE LA CANTIDAD SEA UN NUMERO POSITIVO, SI NO ES VALIDO SE LANZA UNA EXCEPCION CON UN MENSAJE AMIGABLE PARA EL USUARIO
+            ValidationUtils.requeridoPositivo(precioUnitario, "precio unitario"); //AQUI SE VALIDA QUE EL PRECIO UNITARIO SEA UN NUMERO POSITIVO, SI NO ES VALIDO SE LANZA UNA EXCEPCION CON UN MENSAJE AMIGABLE PARA EL USUARIO
 
             if (producto.getStockActual().compareTo(cantidad) < 0) {
                 throw new IllegalArgumentException("Stock insuficiente. Stock actual: "
@@ -170,11 +170,12 @@ public class SalidaController {
             String ivaText = lblIva.getText().replace("IVA (12%): $", "");
             String totalText = lblTotal.getText().replace("Total: $", "");
             
+            // Parsear los valores a BigDecimal
             BigDecimal subtotal = new BigDecimal(subtotalText);
             BigDecimal iva = new BigDecimal(ivaText);
             BigDecimal total = new BigDecimal(totalText);
 
-            NotaSalida nuevaNotaSalida = new NotaSalida(
+            NotaSalida nuevaNotaSalida = new NotaSalida( // AQUI SE CREA un nuevo objeto NotaSalida con los datos de la venta, incluyendo el cliente, numero de factura, fecha, subtotal, iva y total. El idNotaSalida se deja en 0 porque se generará automáticamente al guardarlo en la base de datos
                 0,
                 cliente,
                 numeroFactura,
@@ -188,7 +189,7 @@ public class SalidaController {
                 ""
             );
 
-            NotaSalida notaGuardada = notaSalidaService.crearNotaSalida(nuevaNotaSalida, detalles);
+            NotaSalida notaGuardada = notaSalidaService.crearNotaSalida(nuevaNotaSalida, detalles); // AQUI SE LLAMA AL SERVICIO PARA GUARDAR LA NOTA DE SALIDA Y LOS DETALLES EN LA BASE DE DATOS, Y SE OBTIENE LA NOTA GUARDADA CON EL ID GENERADO
 
             limpiarFormularioCabecera();
             detalles.clear();
@@ -206,8 +207,8 @@ public class SalidaController {
             mostrarMensaje("No se pudo procesar la venta.\n" + e.getMessage(), "Error", Alert.AlertType.ERROR);
         }
     }
-
-    private void actualizarTotales() {
+ 
+    private void actualizarTotales() { // AQUI SE CALCULAN EL SUBTOTAL, IVA Y TOTAL DE LA VENTA SUMANDO LOS SUBTOTALES DE LOS DETALLES, CALCULANDO EL IVA COMO EL 12% DEL SUBTOTAL, Y SUMANDO EL SUBTOTAL Y EL IVA PARA OBTENER EL TOTAL. LUEGO SE ACTUALIZAN LOS LABELS CORRESPONDIENTES PARA MOSTRAR LOS VALORES CALCULADOS
         BigDecimal subtotal = detalles.stream()
             .map(DetalleSalida::getSubtotal)
             .filter(s -> s != null)
@@ -216,8 +217,8 @@ public class SalidaController {
         BigDecimal total = subtotal.add(iva).setScale(2, RoundingMode.HALF_UP);
 
         lblSubtotal.setText("Subtotal: $" + subtotal.setScale(2, RoundingMode.HALF_UP));
-        lblIva.setText("IVA (12%): $" + iva);
-        lblTotal.setText("Total: $" + total);
+        lblIva.setText("IVA (12%): $" + iva); //AQUI SE CALCULA EL IVA COMO EL 12% DEL SUBTOTAL Y SE MUESTRA EN EL LABEL DE IVA
+        lblTotal.setText("Total: $" + total); //AQUI SE CALCULA EL TOTAL SUMANDO EL SUBTOTAL Y EL IVA, Y SE MUESTRA EN EL LABEL DE TOTAL
     }
 
     private void limpiarFormularioDetalle() {
@@ -248,7 +249,7 @@ public class SalidaController {
         return exception.getMessage();
     }
 
-    private BigDecimal parsePositive(String texto, String campo) {
+    private BigDecimal parsePositive(String texto, String campo) { // AQUI SE PARSEA EL TEXTO DE LOS CAMPOS DE CANTIDAD Y PRECIO UNITARIO A BIGDECIMAL, Y SE VALIDA QUE SEAN NUMEROS POSITIVOS. SI NO SON VALIDOS, SE LANZA UNA EXCEPCION CON UN MENSAJE AMIGABLE PARA EL USUARIO
         try {
             return ValidationUtils.requeridoPositivo(new BigDecimal(texto.trim().replace(",", ".")), campo);
         } catch (NumberFormatException e) {

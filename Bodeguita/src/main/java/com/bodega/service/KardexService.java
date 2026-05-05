@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /** Prepara consultas del Kardex valorado para tablas, reportes y defensa. */
@@ -39,11 +38,9 @@ public class KardexService {
     }
 
     private List<KardexRegistro> convertirRegistros(List<MovimientoKardex> movimientos) {
-        List<KardexRegistro> registros = new ArrayList<>();
-        for (MovimientoKardex movimiento : movimientos) {
-            registros.add(convertirRegistro(movimiento));
-        }
-        return registros;
+        return movimientos.stream()
+                .map(this::convertirRegistro)
+                .toList();
     }
 
     private KardexRegistro convertirRegistro(MovimientoKardex movimiento) {

@@ -42,12 +42,10 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
-        colProductoStock.setCellValueFactory(data ->
-                new SimpleStringProperty(String.valueOf(data.getValue().get("producto"))));
-        colStockActual.setCellValueFactory(data ->
-                new SimpleIntegerProperty((Integer) data.getValue().get("stockActual")).asObject());
-        colStockMinimo.setCellValueFactory(data ->
-                new SimpleIntegerProperty((Integer) data.getValue().get("stockMinimo")).asObject());
+        // Configurar columnas de tabla de stock bajo
+        colProductoStock.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().get("producto"))));
+        colStockActual.setCellValueFactory(data -> new SimpleIntegerProperty((Integer) data.getValue().get("stockActual")).asObject());
+        colStockMinimo.setCellValueFactory(data -> new SimpleIntegerProperty((Integer) data.getValue().get("stockMinimo")).asObject());
 
         stockBajoData = FXCollections.observableArrayList();
         tablaStockBajo.setItems(stockBajoData);
@@ -63,24 +61,10 @@ public class DashboardController {
 
     private void actualizarValorInventario() {
         try {
-            BigDecimal valorInventario = kardexDAO.calcularValorInventarioActual();
-            lblValorInventario.setText("Valor Total de Inventario: $" + valorInventario.setScale(2, java.math.RoundingMode.HALF_UP));
+            BigDecimal valorInventario = kardexDAO.calcularValorInventarioActual(); //suma el costo de cada producto por su stock actual
+            lblValorInventario.setText("Valor Total de Inventario: $" + valorInventario.setScale(2, java.math.RoundingMode.HALF_UP)); // Muestra el resultado con dos decimales y formato monetario
         } catch (SQLException e) {
             lblValorInventario.setText("Valor Total de Inventario: no disponible");
-        }
-    }
-
-    private void actualizarStockBajo() {
-        try {
-            stockBajoData.setAll(
-                    productoDAO.listarStockBajo().stream()
-                            .map(producto -> Map.<String, Object>of(
-                                    "producto", producto.getNombre(),
-                                    "stockActual", valorEntero(producto.getStockActual()),
-                                    "stockMinimo", valorEntero(producto.getStockMinimo())))
-                            .toList());
-        } catch (SQLException e) {
-            stockBajoData.clear();
         }
     }
 
@@ -119,6 +103,21 @@ public class DashboardController {
         actualizarStockBajo();
         actualizarTopVendidos();
         actualizarVentas30Dias();
+    }
+
+        private void actualizarStockBajo() {
+        try {
+            stockBajoData.setAll(  /// Se obtiene la lista de productos con stock bajo desde el productoDAO, se transforma cada producto en un mapa con las claves "producto", "stockActual" y "stockMinimo", y se actualiza la lista observable stockBajoData con estos mapas. Si ocurre una excepción durante la consulta, se limpia la lista para mostrar una tabla vacía.
+                               //, devuelve una lista de objetos Producto
+                    productoDAO.listarStockBajo().stream() //devuelve una lista de productos con stock bajo.
+                            .map(producto -> Map.<String, Object>of( // convierte cada producto en un map con claves 
+                                    "producto", producto.getNombre(), //producto
+                                    "stockActual", valorEntero(producto.getStockActual()), //stockactual
+                                    "stockMinimo", valorEntero(producto.getStockMinimo()))) //stockminimo
+                            .toList()); // Reemplaza la lista observable stockBajoData con esta nueva lista de mapas.
+        } catch (SQLException e) {
+            stockBajoData.clear();
+        }
     }
 
     private int valorEntero(BigDecimal valor) {

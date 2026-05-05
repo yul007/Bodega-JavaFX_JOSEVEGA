@@ -118,37 +118,40 @@ public class KardexDAO extends JdbcDaoSupport {
     }
 
     public BigDecimal calcularValorInventarioActual() throws SQLException {
-        String sql = """
+        return calcularValorInventario("""
                 SELECT COALESCE(SUM(cantidad_disponible * costo_unitario), 0) AS valor_inventario
                 FROM lote
                 WHERE activo = TRUE
                   AND cantidad_disponible > 0
-                """;
-
-        try (Connection connection = abrirConexion();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            if (resultSet.next()) {
-                return resultSet.getBigDecimal("valor_inventario");
-            }
-        }
-        return BigDecimal.ZERO;
+                """);
     }
 
     public BigDecimal calcularValorInventarioProducto(Connection connection, int idProducto) throws SQLException {
-        String sql = """
+        return calcularValorInventario(connection, """
                 SELECT COALESCE(SUM(cantidad_disponible * costo_unitario), 0) AS valor_inventario
                 FROM lote
                 WHERE id_producto = ?
                   AND activo = TRUE
                   AND cantidad_disponible > 0
-                """;
+                """, statement -> statement.setInt(1, idProducto));
+    }
 
+    private BigDecimal calcularValorInventario(String sql) throws SQLException {
+        try (Connection connection = abrirConexion()) {
+            return calcularValorInventario(connection, sql, null);
+        }
+    }
+
+    private BigDecimal calcularValorInventario(Connection connection, String sql, StatementConfigurer configurador)
+            throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, idProducto);
+            if (configurador != null) {
+                configurador.configurar(statement);
+            }
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getBigDecimal("valor_inventario");
+                    BigDecimal valor = resultSet.getBigDecimal("valor_inventario");
+                    return valor == null ? BigDecimal.ZERO : valor;
                 }
             }
         }

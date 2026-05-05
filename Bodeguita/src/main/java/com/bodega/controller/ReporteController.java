@@ -53,18 +53,6 @@ public class ReporteController {
         generarReporte("txt");
     }
 
-    @FXML public void onExportarKardex() {
-        Producto producto = comboProducto.getValue();
-        try {
-            if (producto == null) {
-                throw new IllegalArgumentException("Debe seleccionar un producto para exportar el Kardex.");
-            }
-            ReporteService.generarReporteKardexPorProducto(producto, construirKardex(producto.getIdProducto()));
-            mostrarMensaje("Reporte Kardex generado exitosamente.", "Éxito", AlertType.INFORMATION);
-        } catch (IllegalArgumentException | IOException e) {
-            mostrarMensaje(e.getMessage(), "Error", AlertType.ERROR);
-        }
-    }
 
     private void generarReporte(String formato) {
         String tipo = comboTipoReporte.getValue();
@@ -195,6 +183,19 @@ public class ReporteController {
             comboProveedor.setItems(FXCollections.observableArrayList(proveedorDAO.listarActivos()));
         } catch (Exception e) {
             mostrarMensaje("No se pudieron cargar los filtros: " + e.getMessage(), "Error", AlertType.ERROR);
+        }
+    }
+
+        @FXML public void onExportarKardex() {
+        Producto producto = comboProducto.getValue();
+        try {
+            if (producto == null) {
+                throw new IllegalArgumentException("Debe seleccionar un producto para exportar el Kardex.");
+            }
+            ReporteService.generarReporteKardexPorProducto(producto, construirKardex(producto.getIdProducto()));
+            mostrarMensaje("Reporte Kardex generado exitosamente.", "Éxito", AlertType.INFORMATION);
+        } catch (IllegalArgumentException | IOException e) {
+            mostrarMensaje(e.getMessage(), "Error", AlertType.ERROR);
         }
     }
 }

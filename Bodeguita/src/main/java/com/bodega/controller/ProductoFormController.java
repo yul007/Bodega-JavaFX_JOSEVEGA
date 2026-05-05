@@ -44,7 +44,7 @@ public class ProductoFormController {
         this.stage = stage;
     }
 
-    public void setProducto(Producto producto) {
+    public void setProducto(Producto producto) { // AQUI SE ESTABLECE EL PRODUCTO A EDITAR EN EL FORMULARIO, SE LLENAN LOS CAMPOS DEL FORMULARIO CON LOS DATOS DEL PRODUCTO, Y SE GUARDA UNA REFERENCIA AL PRODUCTO ORIGINAL PARA PODER HACER UNA COPIA DE EL SI SE GUARDAN LOS CAMBIOS. SI EL PRODUCTO ES NULL, SE LIMPIAN LOS CAMPOS PARA CREAR UN NUEVO PRODUCTO.
         this.productoOriginal = producto;
         if (producto == null) {
             limpiarCampos();
@@ -66,7 +66,7 @@ public class ProductoFormController {
     }
 
     @FXML
-    private void onGuardar() {
+    private void onGuardar() {  // AQUI SE OBTIENEN LOS DATOS INGRESADOS EN LOS CAMPOS DEL FORMULARIO, SE VALIDAN LOS DATOS, SE CREA UN NUEVO OBJETO PRODUCTO O SE COPIA EL PRODUCTO ORIGINAL CON LOS NUEVOS DATOS, SE ASIGNA EL RESULTADO PARA QUE PUEDA SER OBTENIDO POR EL CONTROLADOR QUE ABRIO EL FORMULARIO, Y SE CIERRA LA VENTANA. SI LOS DATOS NO SON VALIDOS, SE MUESTRA UN MENSAJE DE ERROR AL USUARIO.
         try {
             Categoria categoria = cmbCategoria.getValue();
             String sku = ValidationUtils.requerido(txtSku.getText(), "SKU");
